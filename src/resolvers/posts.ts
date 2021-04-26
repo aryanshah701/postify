@@ -57,7 +57,7 @@ export class PostResolver {
   async deletePost(
     @Arg("id") id: number,
     @Ctx() { em }: MyContext
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     // Attempt to delete the post
     try {
       const delId = await em.nativeDelete(Post, { id });

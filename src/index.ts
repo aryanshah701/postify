@@ -11,6 +11,7 @@ import { PostResolver } from "./resolvers/posts";
 
 import express from "express";
 import "reflect-metadata";
+import { UserResolver } from "./resolvers/users";
 
 const main = async () => {
   // Init the ORM and run the migrations
@@ -23,7 +24,7 @@ const main = async () => {
   // Configure Apollo Server for GraphQL endpoint
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
     context: () => ({ em: orm.em }),
