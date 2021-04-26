@@ -1,15 +1,16 @@
 // MikroORM imports
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
-import { Post } from "./entities/Post";
 import microOrmConfig from "./mikro-orm.config";
 
 // Apollo and GraphQL imports
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
+import { PostResolver } from "./resolvers/posts";
 
 import express from "express";
+import "reflect-metadata";
 
 const main = async () => {
   // Init the ORM and run the migrations
@@ -22,9 +23,10 @@ const main = async () => {
   // Configure Apollo Server for GraphQL endpoint
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver],
+      resolvers: [HelloResolver, PostResolver],
       validate: false,
     }),
+    context: () => ({ em: orm.em }),
   });
 
   // Add GraphQL endpoint
