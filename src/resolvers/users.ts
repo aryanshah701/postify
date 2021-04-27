@@ -4,6 +4,7 @@ import {
   ObjectType,
   Resolver,
   Mutation,
+  Query,
   InputType,
   Field,
   Arg,
@@ -25,7 +26,6 @@ class UserInput {
 class FieldError {
   @Field(() => String, { nullable: true })
   field?: string;
-
   @Field()
   message: string;
 }
@@ -40,13 +40,38 @@ class UserResponse {
   user?: User;
 }
 
+// The resolver class for CRUD operations on Users
 @Resolver()
 export class UserResolver {
+  // Grab and show the authenticated user
+  @Query(() => UserResponse)
+  async me(@Ctx() { em, req }: MyContext): Promise<UserResponse> {
+    // Check if authenticated
+    if (!req.session.userId) {
+      return { errors: [{ message: "Sorry, you aren't logged in." }] };
+    }
+
+    // Grab the user and return it
+    const user = await em.findOne(User, { id: req.session.userId });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            message:
+              "Sorry, the user you are logged in as doesn't exist anymore.",
+          },
+        ],
+      };
+    }
+
+    return { user };
+  }
   // Create a User
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UserInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     // Validate username and password
     if (options.username.length < 3) {
@@ -104,6 +129,9 @@ export class UserResolver {
       }
     }
 
+    // Create a session and save the user id in the session
+    req.session.userId = newUser.id;
+
     return {
       user: newUser,
     };
@@ -113,7 +141,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UserInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     // Grab the user fro the db
     const user = await em.findOne(User, { username: options.username });
@@ -142,6 +170,9 @@ export class UserResolver {
         ],
       };
     }
+
+    // Create a session and save the user id in the session
+    req.session.userId = user.id;
 
     return {
       user,
