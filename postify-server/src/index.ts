@@ -70,7 +70,7 @@ const main = async () => {
   });
 
   // Add GraphQL endpoint
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   // Spin up the express server
   app.listen(4000, () => console.log("Server listening at PORT 4000"));
