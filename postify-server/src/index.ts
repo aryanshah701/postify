@@ -18,6 +18,8 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "./types";
 
+import cors from "cors";
+
 const main = async () => {
   // Init the ORM and run the migrations
   const orm = await MikroORM.init(microOrmConfig);
@@ -30,7 +32,15 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
 
-  // Config and add the express session with Redis store as a middleware
+  // Apply the cors middleware to all routes
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
+  // Config and add express session with Redis store as a middleware
   app.use(
     session({
       name: "qid",
