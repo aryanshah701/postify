@@ -33,31 +33,33 @@ const login: React.FC<{}> = ({}) => {
           return response;
         }}
       >
-        {({ isSubmitting }) => (
-          <Form>
-            <InputField
-              name="username"
-              label="Username"
-              placeholder="username"
-            />
-            <Box mt={4}>
+        {({ isSubmitting }) => {
+          return (
+            <Form>
               <InputField
-                name="password"
-                label="Password"
-                placeholder="password"
-                type="password"
+                name="username"
+                label="Username"
+                placeholder="username"
               />
-            </Box>
-            <Button
-              mt={4}
-              type="submit"
-              isLoading={isSubmitting}
-              colorScheme="teal"
-            >
-              Login
-            </Button>
-          </Form>
-        )}
+              <Box mt={4}>
+                <InputField
+                  name="password"
+                  label="Password"
+                  placeholder="password"
+                  type="password"
+                />
+              </Box>
+              <Button
+                mt={4}
+                type="submit"
+                isLoading={isSubmitting}
+                colorScheme="teal"
+              >
+                Login
+              </Button>
+            </Form>
+          );
+        }}
       </Formik>
     </Wrapper>
   );

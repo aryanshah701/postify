@@ -4,8 +4,7 @@ query Me {
       message
     }
     user {
-      id
-      username
+      ...RegularUser
     }
   }
 }
