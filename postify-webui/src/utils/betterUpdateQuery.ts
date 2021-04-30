@@ -7,5 +7,6 @@ export function betterUpdateQuery<Result, Query>(
   result: any,
   fn: (r: Result, q: Query) => Query
 ) {
+  console.log("In better upadte query");
   return cache.updateQuery(qi, (data) => fn(result, data as any) as any);
 }

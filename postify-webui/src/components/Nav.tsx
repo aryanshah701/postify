@@ -8,12 +8,14 @@ interface NavProps {}
 
 export const Nav: React.FC<NavProps> = ({}) => {
   // Get the current user
-  const [{ data, fetching }] = useMeQuery({ pause: isServer() });
-  const [{ fetching: fetchingLogout }, logout] = useLogoutMutation();
+  // { pause: isServer() }
+  const [{ data, fetching }] = useMeQuery();
+  const [_, logout] = useLogoutMutation();
 
   // The right portion of the nav
   let rightNav = null;
 
+  console.log("data", data);
   // Once the data has been fetched
   if (!fetching && data?.me.user) {
     // If the user is logged in
@@ -22,12 +24,7 @@ export const Nav: React.FC<NavProps> = ({}) => {
         <NextLink href="/">
           <Link mx="2">{data.me.user?.username}</Link>
         </NextLink>
-        <Button
-          mx="2"
-          variant="link"
-          onClick={() => logout()}
-          isFetching={fetchingLogout}
-        >
+        <Button mx="2" variant="link" onClick={async () => await logout()}>
           Logout
         </Button>
       </Flex>

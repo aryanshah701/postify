@@ -21,7 +21,6 @@ const login: React.FC<{}> = ({}) => {
           // Login the user
           const response = await login(values);
 
-          console.log("response: ", response);
           // Check for any errors
           if (response.data?.login.errors) {
             const errors = toErrorMap(response.data?.login.errors);

@@ -5,6 +5,7 @@ import {
   MeQuery,
   MeDocument,
   RegisterMutation,
+  LogoutMutation,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 
@@ -19,47 +20,58 @@ export const createUrqlClient = (ssrExchange: any) =>
     exchanges: [
       dedupExchange,
       cacheExchange({
-        keys: { UserResponse: () => null },
+        // keys: { UserResponse: () => null },
         updates: {
           Mutation: {
-            login(_result, _args, cache, _info) {
-              betterUpdateQuery<LoginMutation, MeQuery>(
+            logout(result, _args, cache, _info) {
+              betterUpdateQuery<LogoutMutation, MeQuery>(
                 cache,
                 { query: MeDocument },
-                _result,
-                (result, query) => {
-                  if (result.login.errors) {
-                    return query;
-                  }
-
-                  return {
-                    me: {
-                      user: result.login.user,
-                      __typename: "UserResponse",
-                    },
-                  };
+                result,
+                () => {
+                  console.log("in logout");
+                  return { me: { user: null } };
                 }
               );
             },
-            register(_result, _args, cache, _info) {
-              betterUpdateQuery<RegisterMutation, MeQuery>(
-                cache,
-                { query: MeDocument },
-                _result,
-                (result, query) => {
-                  if (result.register.errors) {
-                    return query;
-                  }
+            // login(_result, _args, cache, _info) {
+            //   betterUpdateQuery<LoginMutation, MeQuery>(
+            //     cache,
+            //     { query: MeDocument },
+            //     _result,
+            //     (result, query) => {
+            //       if (result.login.errors) {
+            //         return query;
+            //       }
 
-                  return {
-                    me: {
-                      user: result.register.user,
-                      __typename: "UserResponse",
-                    },
-                  };
-                }
-              );
-            },
+            //       return {
+            //         me: {
+            //           user: result.login.user,
+            //           __typename: "UserResponse",
+            //         },
+            //       };
+            //     }
+            //   );
+            // },
+            // register(_result, _args, cache, _info) {
+            //   betterUpdateQuery<RegisterMutation, MeQuery>(
+            //     cache,
+            //     { query: MeDocument },
+            //     _result,
+            //     (result, query) => {
+            //       if (result.register.errors) {
+            //         return query;
+            //       }
+
+            //       return {
+            //         me: {
+            //           user: result.register.user,
+            //           __typename: "UserResponse",
+            //         },
+            //       };
+            //     }
+            //   );
+            // },
           },
         },
       }),
