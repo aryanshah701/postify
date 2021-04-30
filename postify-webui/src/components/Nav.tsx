@@ -33,7 +33,6 @@ export const Nav: React.FC<NavProps> = ({}) => {
     );
   } else if (!fetching && !data?.me.user) {
     // If the user isn't logged in
-    console.log(data);
     rightNav = (
       <Flex>
         <NextLink href="/login">
