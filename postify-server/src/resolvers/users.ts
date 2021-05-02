@@ -1,45 +1,9 @@
-import { User } from "../entities/User";
-import { MyContext } from "src/types";
-import {
-  ObjectType,
-  Resolver,
-  Mutation,
-  Query,
-  InputType,
-  Field,
-  Arg,
-  Ctx,
-} from "type-graphql";
 import argon2 from "argon2";
+import { MyContext, UserInput, UserResponse } from "../types";
+import { validateUser } from "../utils";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { COOKIE_NAME } from "../constants";
-
-// Input type for creating/loging a user
-@InputType()
-class UserInput {
-  @Field()
-  username: string;
-  @Field()
-  password: string;
-}
-
-// An error object for field errors
-@ObjectType()
-class FieldError {
-  @Field(() => String, { nullable: true })
-  field?: string;
-  @Field()
-  message: string;
-}
-
-// A response obeject with any errors or the user itself
-@ObjectType()
-class UserResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-
-  @Field(() => User, { nullable: true })
-  user?: User;
-}
+import { User } from "../entities/User";
 
 // The resolver class for CRUD operations on Users
 @Resolver()
@@ -68,32 +32,19 @@ export class UserResolver {
 
     return { user };
   }
+
   // Create a User
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UserInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    // Validate username and password
-    if (options.username.length < 3) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "Sorry, the username needs to be > 2 characters.",
-          },
-        ],
-      };
-    }
+    // Validate input
+    const errors = validateUser(options);
 
-    if (options.password.length < 8) {
+    if (errors) {
       return {
-        errors: [
-          {
-            field: "password",
-            message: "Sorry, the password needs to be > 7 characters.",
-          },
-        ],
+        errors: errors,
       };
     }
 
@@ -103,6 +54,7 @@ export class UserResolver {
     // Create the new user object
     const newUser = await em.create(User, {
       username: options.username,
+      email: options.email,
       password: hashedPassword,
     });
 
@@ -141,13 +93,19 @@ export class UserResolver {
   // Logging in a user
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UserInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    // Grab the user fro the db
-    const user = await em.findOne(User, { username: options.username });
+    // Try and grab the user for the db by username
+    let user = await em.findOne(User, { username: usernameOrEmail });
 
-    // Ensure that the user exists in the db
+    // If failed try and grab by email
+    if (!user) {
+      user = await em.findOne(User, { email: usernameOrEmail });
+    }
+
+    // If the user still isn't found then doesn't exist
     if (!user) {
       return {
         errors: [
@@ -160,7 +118,7 @@ export class UserResolver {
     }
 
     // Verify the provided password
-    const verified = await argon2.verify(user.password, options.password);
+    const verified = await argon2.verify(user.password, password);
     if (!verified) {
       return {
         errors: [
