@@ -66,14 +66,28 @@ export class UserResolver {
       // Handle different error cases
       if (err.code === "23505") {
         // Duplicate usernames
-        return {
-          errors: [
-            {
-              field: "username",
-              message: "Sorry, this username already exists!",
-            },
-          ],
-        };
+        if (err.detail.includes("username")) {
+          return {
+            errors: [
+              {
+                field: "username",
+                message: "Sorry, this username already exists!",
+              },
+            ],
+          };
+        }
+
+        // Duplicate emails
+        if (err.detail.includes("email")) {
+          return {
+            errors: [
+              {
+                field: "email",
+                message: "Sorry, this email already exists!",
+              },
+            ],
+          };
+        }
       } else {
         // Generic case
         return {
@@ -110,8 +124,8 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
-            message: "Sorry, this username does not exists",
+            field: "usernameOrEmail",
+            message: "Sorry, this email/username does not exist",
           },
         ],
       };
