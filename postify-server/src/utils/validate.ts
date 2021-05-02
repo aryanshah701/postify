@@ -1,4 +1,4 @@
-import { FieldError, UserInput } from "./types";
+import { FieldError, UserInput } from "../types";
 
 export const isValidEmail = (email: string): boolean => {
   const mailFormat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;

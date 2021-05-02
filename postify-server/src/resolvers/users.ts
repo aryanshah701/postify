@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
-import { validateUser } from "../utils";
+import { validateUser } from "../utils/validate";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { COOKIE_NAME } from "../constants";
 import { User } from "../entities/User";
