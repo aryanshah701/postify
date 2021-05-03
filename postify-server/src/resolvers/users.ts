@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
-import { validateUser } from "../utils/validate";
+import { isValidPassword, validateUser } from "../utils/validate";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import {
   CLIENT_URL,
@@ -174,7 +174,8 @@ export class UserResolver {
     });
   }
 
-  // Forgot password mutation
+  // Forgot password: Store a unique token for the user in redis, and
+  // send an email with a link to the change password page with the token
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
@@ -192,9 +193,70 @@ export class UserResolver {
     redis.set(`${REDIS_CHANGE_PASS_PREFIX}${token}`, user.id);
 
     // Send forgot password email with token
-    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/${token}">Click here to change your password</a>`;
+    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/
+    ${token}">Click here to change your password</a>`;
+
     await sendEmail(email, forgotPasswordEmailHtml);
 
     return true;
+  }
+
+  // Change password: Change the user's password on the db after verifying the user token
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("newPassword") newPassword: string,
+    @Arg("token") token: string,
+    @Ctx() { em, redis }: MyContext
+  ): Promise<UserResponse> {
+    // Verify the token
+    const userIdInRedis = await redis.get(
+      `${REDIS_CHANGE_PASS_PREFIX}${token}`
+    );
+
+    if (!userIdInRedis) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "Your token is no longer valid",
+          },
+        ],
+      };
+    }
+
+    // Get the user from the db
+    const user = await em.findOne(User, { id: parseInt(userIdInRedis) });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "Sorry, the user no longer exists",
+          },
+        ],
+      };
+    }
+
+    // Validate password
+    if (!isValidPassword(newPassword)) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: "The password needs to be > 7 characters",
+          },
+        ],
+      };
+    }
+
+    // Change the user's password
+    const newHashedPassword = await argon2.hash(newPassword);
+    user.password = newHashedPassword;
+    em.persistAndFlush(user);
+
+    return {
+      user,
+    };
   }
 }
