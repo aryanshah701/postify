@@ -16,14 +16,14 @@ import { v4 } from "uuid";
 export class UserResolver {
   // Grab and show the authenticated user
   @Query(() => UserResponse)
-  async me(@Ctx() { em, req }: MyContext): Promise<UserResponse> {
+  async me(@Ctx() { req }: MyContext): Promise<UserResponse> {
     // Check if authenticated
     if (!req.session.userId) {
       return { errors: [{ message: "Sorry, you aren't logged in." }] };
     }
 
     // Grab the user and return it
-    const user = await em.findOne(User, { id: req.session.userId });
+    const user = await User.findOne(req.session.userId);
 
     if (!user) {
       return {
@@ -43,7 +43,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UserInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     // Validate input
     const errors = validateUser(options);
@@ -57,16 +57,14 @@ export class UserResolver {
     // Hash the password
     const hashedPassword = await argon2.hash(options.password);
 
-    // Create the new user object
-    const newUser = await em.create(User, {
-      username: options.username,
-      email: options.email,
-      password: hashedPassword,
-    });
-
-    // Persist to the database if possible
+    // Create and persist to the database if possible
+    let newUser;
     try {
-      await em.persistAndFlush(newUser);
+      newUser = await User.create({
+        username: options.username,
+        email: options.email,
+        password: hashedPassword,
+      }).save();
     } catch (err) {
       console.error(err);
       // Handle different error cases
@@ -102,6 +100,17 @@ export class UserResolver {
       }
     }
 
+    // If for some reason the user is undefined
+    if (!newUser) {
+      return {
+        errors: [
+          {
+            message: "Something went wrong when registering.",
+          },
+        ],
+      };
+    }
+
     // Create a session and save the user id in the session
     req.session.userId = newUser.id;
 
@@ -115,14 +124,14 @@ export class UserResolver {
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     // Try and grab the user for the db by username
-    let user = await em.findOne(User, { username: usernameOrEmail });
+    let user = await User.findOne({ where: { username: usernameOrEmail } });
 
     // If failed try and grab by email
     if (!user) {
-      user = await em.findOne(User, { email: usernameOrEmail });
+      user = await User.findOne({ where: { email: usernameOrEmail } });
     }
 
     // If the user still isn't found then doesn't exist
@@ -179,9 +188,9 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { redis }: MyContext
   ): Promise<boolean> {
-    const user = await em.findOne(User, { email });
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       // User doesn't exist in the db
@@ -210,7 +219,7 @@ export class UserResolver {
   async changePassword(
     @Arg("newPassword") newPassword: string,
     @Arg("token") token: string,
-    @Ctx() { em, redis, req }: MyContext
+    @Ctx() { redis, req }: MyContext
   ): Promise<UserResponse> {
     // Verify the token
     const redisKey = `${REDIS_CHANGE_PASS_PREFIX}${token}`;
@@ -228,7 +237,8 @@ export class UserResolver {
     }
 
     // Get the user from the db
-    const user = await em.findOne(User, { id: parseInt(userIdInRedis) });
+    const userId = parseInt(userIdInRedis);
+    const user = await User.findOne(userId);
 
     if (!user) {
       return {
@@ -256,7 +266,7 @@ export class UserResolver {
     // Change the user's password
     const newHashedPassword = await argon2.hash(newPassword);
     user.password = newHashedPassword;
-    em.persistAndFlush(user);
+    User.update({ id: userId }, { password: newHashedPassword });
 
     // Sign the user in autmatically
     req.session.userId = user.id;
