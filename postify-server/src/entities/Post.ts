@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   BaseEntity,
+  ManyToOne,
 } from "typeorm";
 
 @ObjectType()
@@ -15,6 +16,14 @@ export class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Field()
+  @Column()
+  title!: string;
+
+  @Field()
+  @Column()
+  text!: string;
+
   @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;
@@ -22,8 +31,4 @@ export class Post extends BaseEntity {
   @Field(() => String)
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Field()
-  @Column({ type: "text" })
-  title!: string;
 }
