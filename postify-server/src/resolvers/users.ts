@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
 import { validateUser } from "../utils/validate";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { COOKIE_NAME } from "../constants";
+import { CLIENT_URL, COOKIE_NAME } from "../constants";
 import { User } from "../entities/User";
 import { sendEmail } from "../utils/sendEmail";
 
@@ -183,7 +183,8 @@ export class UserResolver {
     }
 
     // Send forgot password email
-    const forgotPasswordEmailHtml = "";
+    const token = "hekajsndaidnskn";
+    const forgotPasswordEmailHtml = `<a href='${CLIENT_URL}/change-password/${token}'`;
     await sendEmail(email, forgotPasswordEmailHtml);
     return true;
   }

@@ -13,7 +13,7 @@ import { UserResolver } from "./resolvers/users";
 import express from "express";
 
 // Redis and express session
-import redis from "redis";
+import redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "./types";
@@ -30,7 +30,7 @@ const main = async () => {
 
   // Set up redis for express session in memory storage
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  const redisClient = new redis();
 
   // Apply the cors middleware to all routes
   app.use(
@@ -66,7 +66,12 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+    context: ({ req, res }): MyContext => ({
+      em: orm.em,
+      req,
+      res,
+      redis: redisClient,
+    }),
   });
 
   // Add GraphQL endpoint
