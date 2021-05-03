@@ -193,8 +193,7 @@ export class UserResolver {
     redis.set(`${REDIS_CHANGE_PASS_PREFIX}${token}`, user.id);
 
     // Send forgot password email with token
-    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/
-    ${token}">Click here to change your password</a>`;
+    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/${token}">Click here to change your password</a>`;
 
     await sendEmail(email, forgotPasswordEmailHtml);
 
@@ -206,7 +205,7 @@ export class UserResolver {
   async changePassword(
     @Arg("newPassword") newPassword: string,
     @Arg("token") token: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { em, redis, req }: MyContext
   ): Promise<UserResponse> {
     // Verify the token
     const userIdInRedis = await redis.get(
@@ -218,7 +217,7 @@ export class UserResolver {
         errors: [
           {
             field: "token",
-            message: "Your token is no longer valid",
+            message: "Your token is no longer valid.",
           },
         ],
       };
@@ -232,7 +231,7 @@ export class UserResolver {
         errors: [
           {
             field: "token",
-            message: "Sorry, the user no longer exists",
+            message: "Sorry, the user no longer exists.",
           },
         ],
       };
@@ -244,7 +243,7 @@ export class UserResolver {
         errors: [
           {
             field: "newPassword",
-            message: "The password needs to be > 7 characters",
+            message: "The password needs to be > 7 characters.",
           },
         ],
       };
@@ -254,6 +253,9 @@ export class UserResolver {
     const newHashedPassword = await argon2.hash(newPassword);
     user.password = newHashedPassword;
     em.persistAndFlush(user);
+
+    // Sign the user in autmatically
+    req.session.userId = user.id;
 
     return {
       user,
