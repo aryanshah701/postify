@@ -28,6 +28,15 @@ export class UserInput {
   password: string;
 }
 
+// Input type for creating a post
+@InputType()
+export class PostInput {
+  @Field()
+  title: string;
+  @Field()
+  text: string;
+}
+
 // An error object for field errors
 @ObjectType()
 export class FieldError {
