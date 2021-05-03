@@ -2,9 +2,14 @@ import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
 import { validateUser } from "../utils/validate";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { CLIENT_URL, COOKIE_NAME } from "../constants";
+import {
+  CLIENT_URL,
+  COOKIE_NAME,
+  REDIS_CHANGE_PASS_PREFIX,
+} from "../constants";
 import { User } from "../entities/User";
 import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 // The resolver class for CRUD operations on Users
 @Resolver()
@@ -173,7 +178,7 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, redis }: MyContext
   ): Promise<boolean> {
     const user = await em.findOne(User, { email });
 
@@ -182,10 +187,14 @@ export class UserResolver {
       return true;
     }
 
-    // Send forgot password email
-    const token = "hekajsndaidnskn";
-    const forgotPasswordEmailHtml = `<a href='${CLIENT_URL}/change-password/${token}'`;
+    // Create uuid token for the user and store in redis
+    const token = v4();
+    redis.set(`${REDIS_CHANGE_PASS_PREFIX}${token}`, user.id);
+
+    // Send forgot password email with token
+    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/${token}">Click here to change your password</a>`;
     await sendEmail(email, forgotPasswordEmailHtml);
+
     return true;
   }
 }
