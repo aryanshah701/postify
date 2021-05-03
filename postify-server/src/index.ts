@@ -1,6 +1,6 @@
 // MikroORM imports
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
+import { CLIENT_URL, __prod__ } from "./constants";
 import microOrmConfig from "./mikro-orm.config";
 
 // Express, Apollo Server and GraphQL imports
@@ -35,7 +35,7 @@ const main = async () => {
   // Apply the cors middleware to all routes
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: CLIENT_URL,
       credentials: true,
     })
   );
