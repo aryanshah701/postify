@@ -1,7 +1,7 @@
 import { MyContext } from "src/types";
 import { MiddlewareFn } from "type-graphql";
 
-export const reqAuthentication: MiddlewareFn<MyContext> = async (
+export const ReqAuthentication: MiddlewareFn<MyContext> = async (
   { context },
   next
 ) => {
