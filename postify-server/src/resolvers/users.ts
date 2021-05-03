@@ -190,7 +190,12 @@ export class UserResolver {
 
     // Create uuid token for the user and store in redis
     const token = v4();
-    redis.set(`${REDIS_CHANGE_PASS_PREFIX}${token}`, user.id);
+    redis.set(
+      `${REDIS_CHANGE_PASS_PREFIX}${token}`,
+      user.id,
+      "ex",
+      1000 * 60 * 60 * 24 // 1 day expiry
+    );
 
     // Send forgot password email with token
     const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/${token}">Click here to change your password</a>`;
@@ -208,9 +213,8 @@ export class UserResolver {
     @Ctx() { em, redis, req }: MyContext
   ): Promise<UserResponse> {
     // Verify the token
-    const userIdInRedis = await redis.get(
-      `${REDIS_CHANGE_PASS_PREFIX}${token}`
-    );
+    const redisKey = `${REDIS_CHANGE_PASS_PREFIX}${token}`;
+    const userIdInRedis = await redis.get(redisKey);
 
     if (!userIdInRedis) {
       return {
@@ -256,6 +260,9 @@ export class UserResolver {
 
     // Sign the user in autmatically
     req.session.userId = user.id;
+
+    // Destroy redis entry
+    redis.del(redisKey);
 
     return {
       user,
