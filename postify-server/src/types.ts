@@ -1,4 +1,3 @@
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import { Request, Response } from "express";
 import { InputType, Field, ObjectType } from "type-graphql";
 import { User } from "./entities/User";
@@ -6,7 +5,6 @@ import { Redis } from "ioredis";
 
 // Context object for resovlers
 export type MyContext = {
-  em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
   req: Request;
   res: Response;
   redis: Redis;

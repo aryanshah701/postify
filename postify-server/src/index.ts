@@ -1,10 +1,9 @@
-// MikroORM imports
-import { MikroORM } from "@mikro-orm/core";
+// ORM imports
+import "reflect-metadata";
+import { createConnection } from "typeorm";
 import { CLIENT_URL, __prod__ } from "./constants";
-import microOrmConfig from "./mikro-orm.config";
 
 // Express, Apollo Server and GraphQL imports
-import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
@@ -19,11 +18,20 @@ import connectRedis from "connect-redis";
 import { MyContext } from "./types";
 
 import cors from "cors";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
 
 const main = async () => {
-  // Init the ORM and run the migrations
-  const orm = await MikroORM.init(microOrmConfig);
-  await orm.getMigrator().up();
+  // Init the ORM connection(auto run migrations)
+  await createConnection({
+    type: "postgres",
+    database: "postify",
+    username: "postgres",
+    password: "postgres",
+    logging: true,
+    synchronize: true,
+    entities: [Post, User],
+  });
 
   // Conifgure Express
   const app = express();
@@ -67,7 +75,6 @@ const main = async () => {
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
-      em: orm.em,
       req,
       res,
       redis: redisClient,
