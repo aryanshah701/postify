@@ -4,6 +4,7 @@ import { validateUser } from "../utils/validate";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { COOKIE_NAME } from "../constants";
 import { User } from "../entities/User";
+import { sendEmail } from "../utils/sendEmail";
 
 // The resolver class for CRUD operations on Users
 @Resolver()
@@ -152,6 +153,7 @@ export class UserResolver {
     };
   }
 
+  // Logout a user by destroying the session
   @Mutation(() => Boolean)
   logout(@Ctx() { req, res }: MyContext): Promise<boolean> {
     // Destroy the session and clear the cookie
@@ -165,5 +167,24 @@ export class UserResolver {
         resolve(true);
       });
     });
+  }
+
+  // Forgot password mutation
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { em }: MyContext
+  ): Promise<boolean> {
+    const user = await em.findOne(User, { email });
+
+    if (!user) {
+      // User doesn't exist in the db
+      return true;
+    }
+
+    // Send forgot password email
+    const forgotPasswordEmailHtml = "";
+    await sendEmail(email, forgotPasswordEmailHtml);
+    return true;
   }
 }
