@@ -1,5 +1,14 @@
 import { Post } from "../entities/Post";
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Arg,
+  UseMiddleware,
+  Ctx,
+} from "type-graphql";
+import { ReqAuthentication } from "../middleware/reqAuthentication";
+import { MyContext, PostInput } from "../types";
 
 // Resolver for CRUD operations for Posts
 @Resolver()
@@ -18,8 +27,16 @@ export class PostResolver {
 
   // Create a single post
   @Mutation(() => Post)
-  async createPost(@Arg("title") title: string): Promise<Post> {
-    return Post.create({ title }).save();
+  @UseMiddleware(ReqAuthentication)
+  async createPost(
+    @Arg("options") options: PostInput,
+    @Ctx() { req }: MyContext
+  ): Promise<Post> {
+    return Post.create({
+      title: options.title,
+      text: options.text,
+      creatorId: req.session.userId,
+    }).save();
   }
 
   // Update a single post
