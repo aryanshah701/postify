@@ -6,17 +6,37 @@ import {
   Arg,
   UseMiddleware,
   Ctx,
+  Int,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
 import { MyContext, PostInput } from "../types";
+import { getConnection } from "typeorm";
+import { PAGINATION_MAX } from "../constants";
 
 // Resolver for CRUD operations for Posts
 @Resolver()
 export class PostResolver {
   // Grab all the posts
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find({});
+  posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string
+  ): Promise<Post[]> {
+    const myLimit = Math.min(PAGINATION_MAX, limit);
+
+    // Get limit posts ordered in descending order of createdAt col
+    const qb = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("user")
+      .take(myLimit)
+      .orderBy('"createdAt"', "DESC");
+
+    // Start at cursor if given
+    if (cursor) {
+      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+    }
+
+    return qb.getMany();
   }
 
   // Grab a single post
