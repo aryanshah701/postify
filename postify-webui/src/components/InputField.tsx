@@ -22,7 +22,6 @@ export const InputField: React.FC<InputFieldProps> = ({
   ...props
 }) => {
   const [field, { error }] = useField(props);
-  console.log(isTextarea);
   let InputComponent: any = isTextarea ? Textarea : Input;
   return (
     <FormControl isInvalid={!!error}>
