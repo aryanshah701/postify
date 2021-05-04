@@ -14,6 +14,9 @@ export const Nav: React.FC<NavProps> = ({}) => {
   // The right portion of the nav
   let rightNav = null;
 
+  // The left portion of the nav
+  let leftNav = null;
+
   // Once the data has been fetched
   if (!fetching && data?.me.user) {
     // If the user is logged in
@@ -32,6 +35,14 @@ export const Nav: React.FC<NavProps> = ({}) => {
         </Button>
       </Flex>
     );
+
+    leftNav = (
+      <Flex>
+        <NextLink href="/create-post">
+          <Link mx="2">Create Post</Link>
+        </NextLink>
+      </Flex>
+    );
   } else if (!fetching && !data?.me.user) {
     // If the user isn't logged in
     rightNav = (
@@ -47,7 +58,8 @@ export const Nav: React.FC<NavProps> = ({}) => {
   }
 
   return (
-    <Flex bg="lteal" p={4} mb={8}>
+    <Flex bg="lteal" zIndex={1} position="sticky" top={0} p={4} mb={8}>
+      <Box>{leftNav}</Box>
       <Box ml={"auto"}>{rightNav}</Box>
     </Flex>
   );
