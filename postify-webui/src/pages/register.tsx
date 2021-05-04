@@ -1,4 +1,5 @@
-import { Button, Box } from "@chakra-ui/react";
+import { Button, Box, Flex } from "@chakra-ui/react";
+import NextLink from "next/link";
 import { Form, Formik } from "formik";
 import { Wrapper } from "../components/Wrapper";
 import React from "react";
@@ -59,14 +60,26 @@ const register: React.FC<registerProps> = ({}) => {
                 type="password"
               />
             </Box>
-            <Button
-              mt={4}
-              type="submit"
-              isLoading={isSubmitting}
-              colorScheme="teal"
-            >
-              Register
-            </Button>
+            <Flex>
+              <Button
+                mt={4}
+                type="submit"
+                isLoading={isSubmitting}
+                colorScheme="teal"
+              >
+                Register
+              </Button>
+              <NextLink href="/login">
+                <Button
+                  mt={4}
+                  mx={2}
+                  isLoading={isSubmitting}
+                  colorScheme="teal"
+                >
+                  Login Here
+                </Button>
+              </NextLink>
+            </Flex>
           </Form>
         )}
       </Formik>

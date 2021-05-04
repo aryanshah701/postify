@@ -56,14 +56,27 @@ const login: React.FC<{}> = ({}) => {
                   <Link ml="auto">Forgot Password?</Link>
                 </NextLink>
               </Flex>
-              <Button
-                mt={4}
-                type="submit"
-                isLoading={isSubmitting}
-                colorScheme="teal"
-              >
-                Login
-              </Button>
+              <Flex>
+                <Button
+                  mt={4}
+                  mx={2}
+                  type="submit"
+                  isLoading={isSubmitting}
+                  colorScheme="teal"
+                >
+                  Login
+                </Button>
+                <NextLink href="/register">
+                  <Button
+                    mt={4}
+                    mx={2}
+                    isLoading={isSubmitting}
+                    colorScheme="teal"
+                  >
+                    Register Here
+                  </Button>
+                </NextLink>
+              </Flex>
             </Form>
           );
         }}
