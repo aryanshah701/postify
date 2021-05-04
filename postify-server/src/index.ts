@@ -2,6 +2,8 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { CLIENT_URL, __prod__ } from "./constants";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
 
 // Express, Apollo Server and GraphQL imports
 import { ApolloServer } from "apollo-server-express";
@@ -18,12 +20,11 @@ import connectRedis from "connect-redis";
 import { MyContext } from "./types";
 
 import cors from "cors";
-import { User } from "./entities/User";
-import { Post } from "./entities/Post";
+import path from "path";
 
 const main = async () => {
   // Init the ORM connection(auto run migrations)
-  await createConnection({
+  const conn = await createConnection({
     type: "postgres",
     database: "postify",
     username: "postgres",
@@ -31,7 +32,10 @@ const main = async () => {
     logging: true,
     synchronize: true,
     entities: [Post, User],
+    migrations: [path.join(__dirname, "./migrations/*")],
   });
+
+  await conn.runMigrations();
 
   // Conifgure Express
   const app = express();

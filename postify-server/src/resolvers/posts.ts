@@ -27,7 +27,7 @@ export class PostResolver {
     // Get limit posts ordered in descending order of createdAt col
     const qb = getConnection()
       .getRepository(Post)
-      .createQueryBuilder("user")
+      .createQueryBuilder("p")
       .take(myLimit)
       .orderBy('"createdAt"', "DESC");
 
