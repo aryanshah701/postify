@@ -27,9 +27,14 @@ const login: React.FC<{}> = ({}) => {
             const errors = toErrorMap(response.data?.login.errors);
             actions.setErrors(errors);
 
-            // Naviagate to the index as a result of successful registeration
+            // Naviagate to the "next" page or index as a result of successful registeration
           } else if (response.data?.login.user) {
-            router.push("/");
+            const nextPage = router.query.next;
+            if (typeof nextPage === "string") {
+              router.push(nextPage);
+            } else {
+              router.push("/");
+            }
           }
 
           return response;
