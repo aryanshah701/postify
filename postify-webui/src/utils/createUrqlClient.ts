@@ -6,6 +6,9 @@ import {
   MeDocument,
   RegisterMutation,
   LogoutMutation,
+  CreatePostMutation,
+  PostsQuery,
+  PostsDocument,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
@@ -38,6 +41,24 @@ export const createUrqlClient = (ssrExchange: any) => ({
       keys: { FieldError: () => null, UserResponse: () => null },
       updates: {
         Mutation: {
+          createPost(_result, _args, cache, _info) {
+            betterUpdateQuery<CreatePostMutation, PostsQuery>(
+              cache,
+              { query: PostsDocument },
+              _result,
+              (result, query) => {
+                if (!result.createPost) {
+                  return query;
+                }
+
+                // Push the new post onto the array of posts
+                query.posts.push(result.createPost);
+                console.log("New posts: ", query);
+
+                return query;
+              }
+            );
+          },
           logout(_result, _args, cache, _info) {
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,
