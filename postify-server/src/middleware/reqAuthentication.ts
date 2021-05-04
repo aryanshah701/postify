@@ -6,7 +6,7 @@ export const ReqAuthentication: MiddlewareFn<MyContext> = async (
   next
 ) => {
   if (!context.req.session.userId) {
-    throw new Error("You need to be logged in for this.");
+    throw new Error("[Not authenticated] You need to be logged in for this.");
   }
 
   return next();
