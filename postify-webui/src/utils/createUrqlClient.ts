@@ -18,7 +18,6 @@ export const errorExchange: Exchange = ({ forward }) => (ops$) => {
     forward(ops$),
     tap(({ error }) => {
       // If the OperationResult has an error, handle it
-      console.log(error);
       if (error?.message.includes("Not authenticated")) {
         Router.replace("/login");
       }
