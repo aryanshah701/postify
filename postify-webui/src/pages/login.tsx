@@ -1,5 +1,5 @@
 import { Button, Box, Flex, Link } from "@chakra-ui/react";
-import NavLink from "next/link";
+import NextLink from "next/link";
 import { Form, Formik } from "formik";
 import { Wrapper } from "../components/Wrapper";
 import React from "react";
@@ -52,9 +52,9 @@ const login: React.FC<{}> = ({}) => {
                 />
               </Box>
               <Flex mt={4}>
-                <NavLink href="/forgot-password">
+                <NextLink href="/forgot-password">
                   <Link ml="auto">Forgot Password?</Link>
-                </NavLink>
+                </NextLink>
               </Flex>
               <Button
                 mt={4}
