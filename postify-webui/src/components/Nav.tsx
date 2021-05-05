@@ -6,6 +6,16 @@ import { isServer } from "../utils/isServer";
 
 interface NavProps {}
 
+const NavBrand: React.FC<{}> = ({}) => {
+  return (
+    <NextLink href="/">
+      <Link mx="2" fontSize="lg" fontWeight="bold">
+        Postify
+      </Link>
+    </NextLink>
+  );
+};
+
 export const Nav: React.FC<NavProps> = ({}) => {
   // Get the current user
   const [{ data, fetching }] = useMeQuery({ pause: isServer() });
@@ -37,7 +47,8 @@ export const Nav: React.FC<NavProps> = ({}) => {
     );
 
     leftNav = (
-      <Flex>
+      <Flex align="center">
+        <NavBrand />
         <NextLink href="/create-post">
           <Link mx="2">Create Post</Link>
         </NextLink>
@@ -53,6 +64,11 @@ export const Nav: React.FC<NavProps> = ({}) => {
         <NextLink href="/register">
           <Link mx="2">Register</Link>
         </NextLink>
+      </Flex>
+    );
+    leftNav = (
+      <Flex align="center">
+        <NavBrand />
       </Flex>
     );
   }
