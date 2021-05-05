@@ -7,6 +7,8 @@ import {
   UseMiddleware,
   Ctx,
   Int,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
 import { MyContext, PostInput } from "../types";
@@ -14,8 +16,14 @@ import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
 
 // Resolver for CRUD operations for Posts
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  // Provide a text snippet field
+  @FieldResolver(() => String)
+  textSnippet(@Root() post: Post) {
+    return post.text.slice(0, 100) + " ...";
+  }
+
   // Grab all the posts
   @Query(() => [Post])
   posts(
