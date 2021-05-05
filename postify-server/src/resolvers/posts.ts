@@ -11,7 +11,7 @@ import {
   Root,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
-import { MyContext, PostInput } from "../types";
+import { MyContext, PostInput, PostsResponse } from "../types";
 import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
 
@@ -25,18 +25,21 @@ export class PostResolver {
   }
 
   // Grab all the posts
-  @Query(() => [Post])
-  posts(
+  @Query(() => PostsResponse)
+  async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string
-  ): Promise<Post[]> {
+  ): Promise<PostsResponse> {
+    // Fetch one more than needed to see if there are any more posts
+    // left in the db
     const myLimit = Math.min(PAGINATION_MAX, limit);
+    const myLimitPlusOne = myLimit + 1;
 
     // Get limit posts ordered in descending order of createdAt col
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
-      .take(myLimit)
+      .take(myLimitPlusOne)
       .orderBy('"createdAt"', "DESC");
 
     // Start at cursor if given
@@ -44,7 +47,11 @@ export class PostResolver {
       qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
     }
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+    return {
+      posts: posts.slice(0, myLimit),
+      hasMore: posts.length === myLimitPlusOne,
+    };
   }
 
   // Grab a single post
