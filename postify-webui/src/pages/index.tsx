@@ -1,7 +1,7 @@
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "../generated/graphql";
-import React from "react";
+import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import {
   Box,
@@ -15,7 +15,11 @@ import {
 import NextLink from "next/link";
 
 const Index = () => {
-  const [{ data, fetching }] = usePostsQuery({ variables: { limit: 10 } });
+  const [paginationVars, setPaginationVars] = useState({
+    limit: 10,
+    cursor: null as null | string,
+  });
+  const [{ data, fetching }] = usePostsQuery({ variables: paginationVars });
 
   // Shouldn't ever come across this case
   if (!fetching && !data) {
@@ -32,7 +36,7 @@ const Index = () => {
       </Flex>
       {data && !fetching ? (
         <Stack spacing={8}>
-          {data.posts.map((post) => (
+          {data.posts.posts.map((post) => (
             <Box p={5} key={post.id} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{post.title}</Heading>
               <Text>{post.textSnippet}</Text>
@@ -40,9 +44,18 @@ const Index = () => {
           ))}
         </Stack>
       ) : null}
-      {data ? (
+      {data && data.posts.hasMore ? (
         <Flex align="center" my={8}>
-          <Button m="auto" isLoading={fetching}>
+          <Button
+            onClick={() =>
+              setPaginationVars({
+                ...paginationVars,
+                cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
+              })
+            }
+            m="auto"
+            isLoading={fetching}
+          >
             Load More
           </Button>
         </Flex>
