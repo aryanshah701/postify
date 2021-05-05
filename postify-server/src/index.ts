@@ -36,6 +36,7 @@ const main = async () => {
   });
 
   await conn.runMigrations();
+  // await Post.delete({});
 
   // Conifgure Express
   const app = express();
