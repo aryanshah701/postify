@@ -1,7 +1,15 @@
 import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
 import { isValidPassword, validateUser } from "../utils/validate";
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 import {
   CLIENT_URL,
   COOKIE_NAME,
@@ -12,8 +20,17 @@ import { sendEmail } from "../utils/sendEmail";
 import { v4 } from "uuid";
 
 // The resolver class for CRUD operations on Users
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  // Only expose the email if the user is authorized to do so
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext): String {
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return "";
+  }
+
   // Grab and show the authenticated user
   @Query(() => UserResponse)
   async me(@Ctx() { req }: MyContext): Promise<UserResponse> {
