@@ -14,6 +14,7 @@ import { ReqAuthentication } from "../middleware/reqAuthentication";
 import { MyContext, PostInput, PostsResponse } from "../types";
 import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
+import { User } from "../entities/User";
 
 // Resolver for CRUD operations for Posts
 @Resolver(Post)
@@ -38,13 +39,16 @@ export class PostResolver {
     // Get limit posts ordered in descending order of createdAt col
     const qb = getConnection()
       .getRepository(Post)
-      .createQueryBuilder("p")
+      .createQueryBuilder("post")
+      .leftJoinAndSelect("post.creator", "u")
       .take(myLimitPlusOne)
-      .orderBy('"createdAt"', "DESC");
+      .orderBy("post.createdAt", "DESC");
 
     // Start at cursor if given
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      qb.where('p."createdAt" < :cursor', {
+        cursor: new Date(parseInt(cursor)),
+      });
     }
 
     const posts = await qb.getMany();
@@ -57,7 +61,7 @@ export class PostResolver {
   // Grab a single post
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+    return Post.findOne(id, { relations: ["creator"] });
   }
 
   // Create a single post
@@ -67,10 +71,11 @@ export class PostResolver {
     @Arg("options") options: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post> {
+    const creator = await User.findOne(req.session.userId);
     return Post.create({
       title: options.title,
       text: options.text,
-      creatorId: req.session.userId,
+      creator,
     }).save();
   }
 
