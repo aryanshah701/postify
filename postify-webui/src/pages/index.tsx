@@ -13,6 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
+import { SinglePost } from "../components/SinglePost";
 
 const Index = () => {
   const [paginationVars, setPaginationVars] = useState({
@@ -36,12 +37,9 @@ const Index = () => {
       </Flex>
       {data && !fetching ? (
         <Stack spacing={8}>
-          {data.posts.posts.map((post) => (
-            <Box p={5} key={post.id} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{post.title}</Heading>
-              <Text>{post.textSnippet}</Text>
-            </Box>
-          ))}
+          {data.posts.posts.map((post) =>
+            post ? <SinglePost post={post} /> : null
+          )}
         </Stack>
       ) : null}
       {data && data.posts.hasMore ? (

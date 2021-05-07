@@ -22,6 +22,7 @@ export type FieldError = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  vote: VoteResponse;
   createPost: Post;
   updatePost?: Maybe<Post>;
   deletePost: Scalars['Boolean'];
@@ -30,6 +31,12 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
   changePassword: UserResponse;
+};
+
+
+export type MutationVoteArgs = {
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
 };
 
 
@@ -77,6 +84,8 @@ export type Post = {
   text: Scalars['String'];
   points: Scalars['Float'];
   creatorId: Scalars['Float'];
+  creator: User;
+  votes: Array<Vote>;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   textSnippet: Scalars['String'];
@@ -117,6 +126,7 @@ export type User = {
   id: Scalars['Float'];
   username: Scalars['String'];
   email: Scalars['String'];
+  votes: Vote;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -131,6 +141,20 @@ export type UserResponse = {
   __typename?: 'UserResponse';
   errors?: Maybe<Array<FieldError>>;
   user?: Maybe<User>;
+};
+
+export type Vote = {
+  __typename?: 'Vote';
+  postId: Scalars['Int'];
+  userId: Scalars['Int'];
+  user: User;
+  value: Scalars['Int'];
+};
+
+export type VoteResponse = {
+  __typename?: 'VoteResponse';
+  errors?: Maybe<Array<FieldError>>;
+  isSuccessful: Scalars['Boolean'];
 };
 
 export type RegularErrorFragment = (
@@ -258,7 +282,11 @@ export type PostsQuery = (
     & Pick<PostsResponse, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'createdAt' | 'title' | 'textSnippet' | 'points'>
+      & Pick<Post, 'id' | 'title' | 'textSnippet' | 'points' | 'createdAt'>
+      & { creator: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
     )> }
   ) }
 );
@@ -375,10 +403,14 @@ export const PostsDocument = gql`
   posts(limit: $limit, cursor: $cursor) {
     posts {
       id
-      createdAt
       title
       textSnippet
       points
+      createdAt
+      creator {
+        id
+        username
+      }
     }
     hasMore
   }

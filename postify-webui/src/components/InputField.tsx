@@ -6,7 +6,7 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { useField } from "formik";
-import React, { ComponentType, InputHTMLAttributes } from "react";
+import React, { InputHTMLAttributes } from "react";
 
 type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   name: string;
