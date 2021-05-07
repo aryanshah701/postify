@@ -11,12 +11,11 @@ import {
   Root,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
-import { MyContext, PostInput, PostsResponse } from "../types";
+import { MyContext, PostInput, PostsResponse, VoteResponse } from "../types";
 import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
 import { User } from "../entities/User";
 import { Vote } from "../entities/Vote";
-import { createVoidZero } from "typescript";
 
 // Resolver for CRUD operations for Posts
 @Resolver(Post)
@@ -28,38 +27,84 @@ export class PostResolver {
   }
 
   // Upvote or downvote the post
-  @Mutation(() => Boolean)
+  @Mutation(() => VoteResponse)
   @UseMiddleware(ReqAuthentication)
   async vote(
     @Arg("postId", () => Int) postId: number,
     @Arg("value", () => Int) value: number,
     @Ctx() { req }: MyContext
-  ): Promise<boolean> {
+  ): Promise<VoteResponse> {
     // Only upvote or downvote by 1
     const realVal = value === -1 ? -1 : 1;
+    const userId = req.session.userId;
+    let prevVoteVal;
 
-    // Insert the vote
-    Vote.insert({
-      userId: req.session.userId,
-      postId,
-      value: realVal,
-    });
-
-    // Update the points for the post
-    try {
-      await getConnection()
-        .createQueryBuilder()
-        .update(Post)
-        .set({
-          points: () => "points + 1",
-        })
-        .where("id = :id", { id: postId })
-        .execute();
-    } catch (err) {
-      return false;
+    // Ensure the provided postId is valid
+    const post = await Post.findOne(postId);
+    if (!post) {
+      return {
+        errors: [{ field: "postId", message: "This post is no longer valid." }],
+        isSuccessful: false,
+      };
     }
 
-    return true;
+    try {
+      // Insert the vote
+      await Vote.insert({
+        userId,
+        postId,
+        value: realVal,
+      });
+
+      // Handle any errors
+    } catch (err) {
+      // Same user voting on the same post
+      if (err.code === "23505") {
+        // Get the previous vote to save it's value
+        const vote = await Vote.findOne({
+          where: { userId: userId, postId: postId },
+        });
+        prevVoteVal = vote?.value;
+
+        // Update the vote
+        await getConnection()
+          .createQueryBuilder()
+          .update(Vote)
+          .set({ value: realVal })
+          .where("userId = :userId", { userId })
+          .andWhere("postId = :postId", { postId })
+          .execute();
+
+        // Some other unknown error
+      } else {
+        return {
+          errors: [
+            {
+              field: "vote",
+              message: "Something went wrong with inserting the new vote.",
+            },
+          ],
+          isSuccessful: false,
+        };
+      }
+    }
+
+    // Update the points of the post
+    if (prevVoteVal && prevVoteVal === realVal) {
+      // No change in points so do nothing
+      return { isSuccessful: true };
+    } else if (prevVoteVal) {
+      // Opposite change in points
+      Post.update(
+        { id: postId },
+        { points: post.points - prevVoteVal + realVal }
+      );
+    } else {
+      // User is voting on this post for the first time
+      Post.update({ id: postId }, { points: post.points + realVal });
+    }
+
+    return { isSuccessful: true };
   }
 
   // Grab all the posts

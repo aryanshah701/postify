@@ -66,3 +66,13 @@ export class PostsResponse {
   @Field()
   hasMore: boolean;
 }
+
+// The response object when voting on a post
+@ObjectType()
+export class VoteResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field()
+  isSuccessful: Boolean;
+}
