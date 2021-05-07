@@ -1,16 +1,53 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
-import React from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
 
-export const SinglePost: React.FC<{ post: any }> = ({ post }) => {
+interface SinglePostProps {
+  post: PostSnippetFragment;
+}
+
+export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
+  // State for loading indicators on vote buttons
+  const [loadingState, setLoadingState] = useState<
+    "upvote-loading" | "downvote-loading" | "not-loading"
+  >("not-loading");
+  const [, vote] = useVoteMutation();
+
   return (
-    <Box p={5} key={post.id} shadow="md" borderWidth="1px">
-      <Flex>
-        <Heading mr={2} fontSize="xl">
-          {post.title}
-        </Heading>
-        <Text as="cite">posted by {post.creator.username}</Text>
+    <Flex p={5} key={post.id} shadow="md" borderWidth="1px">
+      <Flex direction="column" alignItems="center" mr={4}>
+        <IconButton
+          onClick={async () => {
+            setLoadingState("upvote-loading");
+            await vote({ postId: post.id, value: 1 });
+            setLoadingState("not-loading");
+          }}
+          isLoading={loadingState === "upvote-loading"}
+          aria-label="upvote the post"
+          icon={<ChevronUpIcon />}
+        />
+        <Text my={2}>{post.points}</Text>
+        <IconButton
+          onClick={async () => {
+            setLoadingState("downvote-loading");
+            await vote({ postId: post.id, value: -1 });
+            setLoadingState("not-loading");
+          }}
+          isLoading={loadingState === "downvote-loading"}
+          aria-label="downvote the post"
+          icon={<ChevronDownIcon />}
+        />
       </Flex>
-      <Text isTruncated>{post.textSnippet}</Text>
-    </Box>
+      <Box>
+        <Flex>
+          <Heading mr={2} mb={2} fontSize="xl">
+            {post.title}
+          </Heading>
+          <Text as="cite">posted by {post.creator.username}</Text>
+        </Flex>
+        <Text>{post.textSnippet}</Text>
+      </Box>
+    </Flex>
   );
 };
