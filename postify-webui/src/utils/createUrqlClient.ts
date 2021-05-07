@@ -95,7 +95,18 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
-          logout(_result, _args, cache, _info) {
+          createPost: (_result, _args, cache, _info) => {
+            // Invalidate all pages of posts stored in cache
+            const allFields = cache.inspectFields("Query");
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === "posts"
+            );
+
+            fieldInfos.forEach((fi) =>
+              cache.invalidate("Query", "posts", fi.arguments || {})
+            );
+          },
+          logout: (_result, _args, cache, _info) => {
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -111,7 +122,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
-          login(_result, _args, cache, _info) {
+          login: (_result, _args, cache, _info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -131,7 +142,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
-          register(_result, _args, cache, _info) {
+          register: (_result, _args, cache, _info) => {
             betterUpdateQuery<RegisterMutation, MeQuery>(
               cache,
               { query: MeDocument },
