@@ -23,7 +23,11 @@ export class PostResolver {
   // Provide a text snippet field
   @FieldResolver(() => String)
   textSnippet(@Root() post: Post) {
-    return post.text.slice(0, 100);
+    if (post.text.length > 200) {
+      return post.text.slice(0, 200) + " ...";
+    } else {
+      return post.text;
+    }
   }
 
   // Upvote or downvote the post
