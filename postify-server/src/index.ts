@@ -21,6 +21,7 @@ import { MyContext } from "./types";
 
 import cors from "cors";
 import path from "path";
+import { Vote } from "./entities/Vote";
 
 const main = async () => {
   // Init the ORM connection(auto run migrations)
@@ -31,7 +32,7 @@ const main = async () => {
     password: "postgres",
     logging: true,
     synchronize: true,
-    entities: [Post, User],
+    entities: [Post, User, Vote],
     migrations: [path.join(__dirname, "./migrations/*")],
   });
 

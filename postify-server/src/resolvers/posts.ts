@@ -15,6 +15,8 @@ import { MyContext, PostInput, PostsResponse } from "../types";
 import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
 import { User } from "../entities/User";
+import { Vote } from "../entities/Vote";
+import { createVoidZero } from "typescript";
 
 // Resolver for CRUD operations for Posts
 @Resolver(Post)
@@ -23,6 +25,41 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() post: Post) {
     return post.text.slice(0, 100) + " ...";
+  }
+
+  // Upvote or downvote the post
+  @Mutation(() => Boolean)
+  @UseMiddleware(ReqAuthentication)
+  async vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    // Only upvote or downvote by 1
+    const realVal = value === -1 ? -1 : 1;
+
+    // Insert the vote
+    Vote.insert({
+      userId: req.session.userId,
+      postId,
+      value: realVal,
+    });
+
+    // Update the points for the post
+    try {
+      await getConnection()
+        .createQueryBuilder()
+        .update(Post)
+        .set({
+          points: () => "points + 1",
+        })
+        .where("id = :id", { id: postId })
+        .execute();
+    } catch (err) {
+      return false;
+    }
+
+    return true;
   }
 
   // Grab all the posts
@@ -40,13 +77,15 @@ export class PostResolver {
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("post")
-      .leftJoinAndSelect("post.creator", "u")
+      .leftJoinAndSelect("post.creator", "creator")
+      .leftJoinAndSelect("post.votes", "votes")
+      .leftJoinAndSelect("votes.user", "user")
       .take(myLimitPlusOne)
       .orderBy("post.createdAt", "DESC");
 
     // Start at cursor if given
     if (cursor) {
-      qb.where('p."createdAt" < :cursor', {
+      qb.where('post."createdAt" < :cursor', {
         cursor: new Date(parseInt(cursor)),
       });
     }
@@ -61,7 +100,7 @@ export class PostResolver {
   // Grab a single post
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id, { relations: ["creator"] });
+    return Post.findOne(id, { relations: ["creator", "votes", "votes.user"] });
   }
 
   // Create a single post
