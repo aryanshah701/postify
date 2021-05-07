@@ -66,7 +66,12 @@ export class PostResolver {
         });
         prevVoteVal = vote?.value;
 
-        // Update the vote
+        // Nothing needs to happen if the new vote and prev vote are the same
+        if (prevVoteVal && realVal === prevVoteVal) {
+          return { isSuccessful: true };
+        }
+
+        // Update the vote if a new different value vote is being made
         await getConnection()
           .createQueryBuilder()
           .update(Vote)
@@ -89,12 +94,9 @@ export class PostResolver {
       }
     }
 
-    // Update the points of the post
-    if (prevVoteVal && prevVoteVal === realVal) {
-      // No change in points so do nothing
-      return { isSuccessful: true };
-    } else if (prevVoteVal) {
-      // Opposite change in points
+    // Update the points on the post
+    if (prevVoteVal) {
+      // Opposite change in points(no value change in points handled above)
       Post.update(
         { id: postId },
         { points: post.points - prevVoteVal + realVal }
