@@ -72,12 +72,7 @@ const login: React.FC<{}> = ({}) => {
                   Login
                 </Button>
                 <NextLink href="/register">
-                  <Button
-                    mt={4}
-                    mx={2}
-                    isLoading={isSubmitting}
-                    colorScheme="teal"
-                  >
+                  <Button mt={4} mx={2} colorScheme="teal">
                     Register Here
                   </Button>
                 </NextLink>

@@ -70,12 +70,7 @@ const register: React.FC<registerProps> = ({}) => {
                 Register
               </Button>
               <NextLink href="/login">
-                <Button
-                  mt={4}
-                  mx={2}
-                  isLoading={isSubmitting}
-                  colorScheme="teal"
-                >
+                <Button mt={4} mx={2} colorScheme="teal">
                   Login Here
                 </Button>
               </NextLink>
