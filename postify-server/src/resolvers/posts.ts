@@ -22,7 +22,7 @@ import { Vote } from "../entities/Vote";
 export class PostResolver {
   // Provide a text snippet field
   @FieldResolver(() => String)
-  textSnippet(@Root() post: Post) {
+  textSnippet(@Root() post: Post): String {
     if (post.text.length > 200) {
       return post.text.slice(0, 200) + " ...";
     } else {
@@ -117,7 +117,8 @@ export class PostResolver {
   @Query(() => PostsResponse)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string
+    @Arg("cursor", () => String, { nullable: true }) cursor: string,
+    @Ctx() { req }: MyContext
   ): Promise<PostsResponse> {
     // Fetch one more than needed to see if there are any more posts
     // left in the db
@@ -125,6 +126,7 @@ export class PostResolver {
     const myLimitPlusOne = myLimit + 1;
 
     // Get limit posts ordered in descending order of createdAt col
+    let userId = req.session.userId;
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("post")
@@ -142,16 +144,59 @@ export class PostResolver {
     }
 
     const posts = await qb.getMany();
+
+    // Add voteStatus on each post
+    const postsToReturn = posts.slice(0, myLimit).map(
+      (p): Post => {
+        // Votestatus is null if the user isn't logged in
+        if (!userId) {
+          p.voteStatus = null;
+          return p;
+        }
+
+        // Search for the user's vote
+        const voteStatus = p.votes.find((v) => v.userId === userId)?.value;
+
+        // Add the vote status field
+        if (voteStatus) {
+          p.voteStatus = voteStatus;
+        } else {
+          p.voteStatus = null;
+        }
+        return p;
+      }
+    );
+
     return {
-      posts: posts.slice(0, myLimit),
+      posts: postsToReturn,
       hasMore: posts.length === myLimitPlusOne,
     };
   }
 
   // Grab a single post
   @Query(() => Post, { nullable: true })
-  post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id, { relations: ["creator", "votes", "votes.user"] });
+  async post(
+    @Arg("id") id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<Post | undefined> {
+    // Grab the post
+    const post = await Post.findOne(id, {
+      relations: ["creator", "votes", "votes.user"],
+    });
+
+    // Add the voteStatus field if logged in
+    const userId = req.session.userId;
+    let voteStatus = null;
+    if (userId) {
+      voteStatus = post?.votes.find((v) => v.userId === userId)?.value;
+      voteStatus = voteStatus ? voteStatus : null;
+    }
+
+    if (post) {
+      post.voteStatus = voteStatus;
+    }
+
+    return post;
   }
 
   // Create a single post
