@@ -26,6 +26,7 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           isLoading={loadingState === "upvote-loading"}
           aria-label="upvote the post"
           icon={<ChevronUpIcon />}
+          colorScheme={post.voteStatus === 1 ? "green" : undefined}
         />
         <Text my={2}>{post.points}</Text>
         <IconButton
@@ -37,6 +38,7 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           isLoading={loadingState === "downvote-loading"}
           aria-label="downvote the post"
           icon={<ChevronDownIcon />}
+          colorScheme={post.voteStatus === -1 ? "red" : undefined}
         />
       </Flex>
       <Box>
