@@ -239,8 +239,27 @@ export class PostResolver {
 
   // Delete a Post
   @Mutation(() => Boolean)
-  async deletePost(@Arg("id") id: number): Promise<boolean> {
+  @UseMiddleware(ReqAuthentication)
+  async deletePost(
+    @Arg("id") id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    // Ensure the post exists
+    const post = await Post.findOne(id);
+    if (!post) {
+      return false;
+    }
+
+    // Ensure the user is autherized to delete this post
+    if (post.creatorId !== parseInt(req.session.id)) {
+      throw new Error(
+        "Not authorized: You need to be the owner of this post to delete it."
+      );
+    }
+
+    // Delete it
     await Post.delete(id);
+
     return true;
   }
 }
