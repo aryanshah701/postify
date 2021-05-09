@@ -9,7 +9,7 @@ interface NavProps {}
 const NavBrand: React.FC<{}> = ({}) => {
   return (
     <NextLink href="/">
-      <Link mx="2" fontSize="lg" fontWeight="bold">
+      <Link mx="2" fontSize="2xl" fontWeight="bold">
         Postify
       </Link>
     </NextLink>
@@ -31,7 +31,12 @@ export const Nav: React.FC<NavProps> = ({}) => {
   if (!fetching && data?.me.user) {
     // If the user is logged in
     rightNav = (
-      <Flex>
+      <Flex align="center">
+        <NextLink href="/create-post">
+          <Button as={Link} mx="2">
+            Create Post
+          </Button>
+        </NextLink>
         <NextLink href="/">
           <Link mx="2">{data.me.user?.username}</Link>
         </NextLink>
@@ -49,9 +54,6 @@ export const Nav: React.FC<NavProps> = ({}) => {
     leftNav = (
       <Flex align="center">
         <NavBrand />
-        <NextLink href="/create-post">
-          <Link mx="2">Create Post</Link>
-        </NextLink>
       </Flex>
     );
   } else if (!fetching && !data?.me.user) {
@@ -75,8 +77,18 @@ export const Nav: React.FC<NavProps> = ({}) => {
 
   return (
     <Flex bg="lteal" zIndex={1} position="sticky" top={0} p={4} mb={8}>
-      <Box>{leftNav}</Box>
-      <Box ml={"auto"}>{rightNav}</Box>
+      <Flex
+        flex={1}
+        m="auto"
+        align="center"
+        maxW={800}
+        zIndex={1}
+        m-wposition="sticky"
+        top={0}
+      >
+        <Box>{leftNav}</Box>
+        <Box ml={"auto"}>{rightNav}</Box>
+      </Flex>
     </Flex>
   );
 };
