@@ -241,7 +241,7 @@ export class PostResolver {
   @Mutation(() => Boolean)
   @UseMiddleware(ReqAuthentication)
   async deletePost(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { req }: MyContext
   ): Promise<boolean> {
     // Ensure the post exists
