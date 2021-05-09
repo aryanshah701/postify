@@ -12,6 +12,7 @@ import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
 import { Exchange } from "urql";
 import Router from "next/router";
+import { isServer } from "./isServer";
 
 // Cursor pagination exchange
 const cursorPagination = (): Resolver => {
@@ -86,144 +87,154 @@ function invalidatePosts(cache: Cache): void {
 
 // A function that creates an urql client with an ssrExhange for
 // server side rendering
-export const createUrqlClient = (ssrExchange: any) => ({
-  url: "http://localhost:4000/graphql",
-  fetchOptions: {
-    credentials: "include" as const,
-  },
-  exchanges: [
-    dedupExchange,
-    cacheExchange({
-      keys: {
-        PostsResponse: () => null,
-        FieldError: () => null,
-        UserResponse: () => null,
-      },
-      resolvers: {
-        Query: {
-          posts: cursorPagination(),
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+  let cookie;
+
+  // Grab the cookie from the context if on the nextjs server
+  if (isServer()) {
+    cookie = ctx.req.headers.cookie;
+  }
+
+  return {
+    url: "http://localhost:4000/graphql",
+    fetchOptions: {
+      credentials: "include" as const,
+      headers: cookie ? { cookie } : undefined,
+    },
+    exchanges: [
+      dedupExchange,
+      cacheExchange({
+        keys: {
+          PostsResponse: () => null,
+          FieldError: () => null,
+          UserResponse: () => null,
         },
-      },
-      updates: {
-        Mutation: {
-          vote: (_result, args, cache, info) => {
-            const { postId, value } = args as VoteMutationVariables;
-            const cacheData = cache.readFragment(
-              gql`
-                fragment _ on Post {
-                  points
-                  voteStatus
-                }
-              `,
-              { id: postId }
-            );
-
-            if (cacheData) {
-              let newPoints;
-
-              // If the user has voted previously
-              if (cacheData.voteStatus) {
-                // If there is no change, do nothing
-                if (cacheData.voteStatus === value) {
-                  return;
-                }
-
-                newPoints = cacheData.points - cacheData.voteStatus + value;
-
-                // The user hasn't voted previously
-              } else {
-                newPoints = cacheData.points + value;
-              }
-
-              // Write the new points and voteStatus to the cache
-              cache.writeFragment(
+        resolvers: {
+          Query: {
+            posts: cursorPagination(),
+          },
+        },
+        updates: {
+          Mutation: {
+            vote: (_result, args, cache, _info) => {
+              const { postId, value } = args as VoteMutationVariables;
+              const cacheData = cache.readFragment(
                 gql`
-                  fragment __ on Post {
+                  fragment _ on Post {
                     points
                     voteStatus
                   }
                 `,
-                { id: postId, points: newPoints, voteStatus: value }
+                { id: postId }
               );
-            }
-          },
-          createPost: (_result, _args, cache, _info) => {
-            // Invalidate all pages of posts stored in cache
-            invalidatePosts(cache);
-          },
-          logout: (_result, _args, cache, _info) => {
-            // Update me query in cache to be null now
-            betterUpdateQuery<LogoutMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              () => {
-                return {
-                  me: {
-                    user: null,
-                    errors: null,
-                    __typename: "UserResponse",
-                  },
-                };
-              }
-            );
 
-            // Invalidate all posts in cache
-            invalidatePosts(cache);
-          },
-          login: (_result, _args, cache, _info) => {
-            // Update me query to have the new logged in user
-            betterUpdateQuery<LoginMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (result.login.errors) {
-                  return query;
+              if (cacheData) {
+                let newPoints;
+
+                // If the user has voted previously
+                if (cacheData.voteStatus) {
+                  // If there is no change, do nothing
+                  if (cacheData.voteStatus === value) {
+                    return;
+                  }
+
+                  newPoints = cacheData.points - cacheData.voteStatus + value;
+
+                  // The user hasn't voted previously
+                } else {
+                  newPoints = cacheData.points + value;
                 }
 
-                return {
-                  me: {
-                    user: result.login.user,
-                    __typename: "UserResponse",
-                    errors: null,
-                  },
-                };
+                // Write the new points and voteStatus to the cache
+                cache.writeFragment(
+                  gql`
+                    fragment __ on Post {
+                      points
+                      voteStatus
+                    }
+                  `,
+                  { id: postId, points: newPoints, voteStatus: value }
+                );
               }
-            );
-
-            // Invalidate the posts in the cache
-            invalidatePosts(cache);
-          },
-          register: (_result, _args, cache, _info) => {
-            // Update me query to have the new logged in user
-            betterUpdateQuery<RegisterMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (result.register.errors) {
-                  return query;
+            },
+            createPost: (_result, _args, cache, _info) => {
+              // Invalidate all pages of posts stored in cache
+              invalidatePosts(cache);
+            },
+            logout: (_result, _args, cache, _info) => {
+              // Update me query in cache to be null now
+              betterUpdateQuery<LogoutMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                () => {
+                  return {
+                    me: {
+                      user: null,
+                      errors: null,
+                      __typename: "UserResponse",
+                    },
+                  };
                 }
+              );
 
-                return {
-                  me: {
-                    user: result.register.user,
-                    __typename: "UserResponse",
-                    errors: null,
-                  },
-                };
-              }
-            );
+              // Invalidate all posts in cache
+              invalidatePosts(cache);
+            },
+            login: (_result, _args, cache, _info) => {
+              // Update me query to have the new logged in user
+              betterUpdateQuery<LoginMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (result.login.errors) {
+                    return query;
+                  }
 
-            // Invalidate the posts in the cache
-            invalidatePosts(cache);
+                  return {
+                    me: {
+                      user: result.login.user,
+                      __typename: "UserResponse",
+                      errors: null,
+                    },
+                  };
+                }
+              );
+
+              // Invalidate the posts in the cache
+              invalidatePosts(cache);
+            },
+            register: (_result, _args, cache, _info) => {
+              // Update me query to have the new logged in user
+              betterUpdateQuery<RegisterMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (result.register.errors) {
+                    return query;
+                  }
+
+                  return {
+                    me: {
+                      user: result.register.user,
+                      __typename: "UserResponse",
+                      errors: null,
+                    },
+                  };
+                }
+              );
+
+              // Invalidate the posts in the cache
+              invalidatePosts(cache);
+            },
           },
         },
-      },
-    }),
-    errorExchange,
-    ssrExchange,
-    fetchExchange,
-  ],
-});
+      }),
+      errorExchange,
+      ssrExchange,
+      fetchExchange,
+    ],
+  };
+};
