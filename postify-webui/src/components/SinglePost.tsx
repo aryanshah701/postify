@@ -15,7 +15,7 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
   const [, vote] = useVoteMutation();
 
   return (
-    <Flex p={5} key={post.id} shadow="md" borderWidth="1px">
+    <Flex p={5} shadow="md" borderWidth="1px">
       <Flex direction="column" alignItems="center" mr={4}>
         <IconButton
           onClick={async () => {
