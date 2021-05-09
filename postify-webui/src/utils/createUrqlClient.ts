@@ -1,11 +1,12 @@
-import { dedupExchange, fetchExchange, stringifyVariables } from "urql";
-import { cacheExchange, NullArray, Resolver } from "@urql/exchange-graphcache";
+import { dedupExchange, fetchExchange, gql, stringifyVariables } from "urql";
+import { cacheExchange, Resolver, Cache } from "@urql/exchange-graphcache";
 import {
   LoginMutation,
   MeQuery,
   MeDocument,
   RegisterMutation,
   LogoutMutation,
+  VoteMutationVariables,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
@@ -73,6 +74,16 @@ export const errorExchange: Exchange = ({ forward }) => (ops$) => {
   );
 };
 
+// Invalidate all pagianted posts(used when creating a post, logging in etc)
+function invalidatePosts(cache: Cache): void {
+  const allFields = cache.inspectFields("Query");
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts");
+
+  fieldInfos.forEach((fi) =>
+    cache.invalidate("Query", "posts", fi.arguments || {})
+  );
+}
+
 // A function that creates an urql client with an ssrExhange for
 // server side rendering
 export const createUrqlClient = (ssrExchange: any) => ({
@@ -95,18 +106,53 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
-          createPost: (_result, _args, cache, _info) => {
-            // Invalidate all pages of posts stored in cache
-            const allFields = cache.inspectFields("Query");
-            const fieldInfos = allFields.filter(
-              (info) => info.fieldName === "posts"
+          vote: (_result, args, cache, info) => {
+            const { postId, value } = args as VoteMutationVariables;
+            const cacheData = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  points
+                  voteStatus
+                }
+              `,
+              { id: postId }
             );
 
-            fieldInfos.forEach((fi) =>
-              cache.invalidate("Query", "posts", fi.arguments || {})
-            );
+            if (cacheData) {
+              let newPoints;
+
+              // If the user has voted previously
+              if (cacheData.voteStatus) {
+                // If there is no change, do nothing
+                if (cacheData.voteStatus === value) {
+                  return;
+                }
+
+                newPoints = cacheData.points - cacheData.voteStatus + value;
+
+                // The user hasn't voted previously
+              } else {
+                newPoints = cacheData.points + value;
+              }
+
+              // Write the new points and voteStatus to the cache
+              cache.writeFragment(
+                gql`
+                  fragment __ on Post {
+                    points
+                    voteStatus
+                  }
+                `,
+                { id: postId, points: newPoints, voteStatus: value }
+              );
+            }
+          },
+          createPost: (_result, _args, cache, _info) => {
+            // Invalidate all pages of posts stored in cache
+            invalidatePosts(cache);
           },
           logout: (_result, _args, cache, _info) => {
+            // Update me query in cache to be null now
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -121,8 +167,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 };
               }
             );
+
+            // Invalidate all posts in cache
+            invalidatePosts(cache);
           },
           login: (_result, _args, cache, _info) => {
+            // Update me query to have the new logged in user
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -141,8 +191,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 };
               }
             );
+
+            // Invalidate the posts in the cache
+            invalidatePosts(cache);
           },
           register: (_result, _args, cache, _info) => {
+            // Update me query to have the new logged in user
             betterUpdateQuery<RegisterMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -161,6 +215,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 };
               }
             );
+
+            // Invalidate the posts in the cache
+            invalidatePosts(cache);
           },
         },
       },
