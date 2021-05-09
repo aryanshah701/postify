@@ -251,7 +251,7 @@ export class PostResolver {
     }
 
     // Ensure the user is autherized to delete this post
-    if (post.creatorId !== parseInt(req.session.id)) {
+    if (post.creatorId !== req.session.userId) {
       throw new Error(
         "Not authorized: You need to be the owner of this post to delete it."
       );
