@@ -91,7 +91,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie;
 
   // Grab the cookie from the context if on the nextjs server
-  if (isServer()) {
+  if (isServer() && ctx) {
     cookie = ctx.req.headers.cookie;
   }
 
