@@ -1,19 +1,27 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import React, { useState } from "react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
+import {
+  MeQuery,
+  PostSnippetFragment,
+  RegularUserResponseFragment,
+  useDeletePostMutation,
+  useVoteMutation,
+} from "../generated/graphql";
 
 interface SinglePostProps {
   post: PostSnippetFragment;
+  me?: RegularUserResponseFragment;
 }
 
-export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
+export const SinglePost: React.FC<SinglePostProps> = ({ post, me }) => {
   // State for loading indicators on vote buttons
   const [loadingState, setLoadingState] = useState<
     "upvote-loading" | "downvote-loading" | "not-loading"
   >("not-loading");
   const [, vote] = useVoteMutation();
+  const [, deletePost] = useDeletePostMutation();
 
   return (
     <Flex p={5} shadow="md" borderWidth="1px">
@@ -42,8 +50,8 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           colorScheme={post.voteStatus === -1 ? "red" : undefined}
         />
       </Flex>
-      <Box>
-        <Flex>
+      <Box flex={1}>
+        <Flex mb={2}>
           <NextLink href="/post/[id]" as={`/post/${post.id}`}>
             <Link>
               <Heading mr={2} mb={2} fontSize="xl">
@@ -52,8 +60,22 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
             </Link>
           </NextLink>
           <Text as="cite">posted by {post.creator.username}</Text>
+          {post.creator.id === me?.user?.id ? (
+            <IconButton
+              icon={<DeleteIcon />}
+              variant="outline"
+              aria-label="Delete post"
+              colorScheme="red"
+              ml="auto"
+              onClick={() => {
+                deletePost({ id: post.id });
+              }}
+            />
+          ) : null}
         </Flex>
-        <Text>{post.textSnippet}</Text>
+        <Flex align="center">
+          <Text>{post.textSnippet}</Text>
+        </Flex>
       </Box>
     </Flex>
   );

@@ -1,6 +1,6 @@
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { usePostsQuery } from "../generated/graphql";
+import { useMeQuery, usePostsQuery } from "../generated/graphql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import {
@@ -21,6 +21,7 @@ const Index = () => {
     cursor: null as null | string,
   });
   const [{ data, fetching }] = usePostsQuery({ variables: paginationVars });
+  const [{ data: meData }] = useMeQuery();
 
   // Shouldn't ever come across this case
   if (!fetching && !data) {
@@ -38,7 +39,7 @@ const Index = () => {
       {data && !fetching ? (
         <Stack spacing={8}>
           {data.posts.posts.map((post) => (
-            <SinglePost key={post.id} post={post} />
+            <SinglePost key={post.id} post={post} me={meData?.me} />
           ))}
         </Stack>
       ) : null}

@@ -1,10 +1,5 @@
 query Me {
   me {
-    errors {
-      message
-    }
-    user {
-      ...RegularUser
-    }
+    ...RegularUserResponse
   }
 }
