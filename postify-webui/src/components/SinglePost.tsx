@@ -1,5 +1,6 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
+import NextLink from "next/link";
 import React, { useState } from "react";
 import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
 
@@ -43,9 +44,13 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
       </Flex>
       <Box>
         <Flex>
-          <Heading mr={2} mb={2} fontSize="xl">
-            {post.title}
-          </Heading>
+          <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+            <Link>
+              <Heading mr={2} mb={2} fontSize="xl">
+                {post.title}
+              </Heading>
+            </Link>
+          </NextLink>
           <Text as="cite">posted by {post.creator.username}</Text>
         </Flex>
         <Text>{post.textSnippet}</Text>
