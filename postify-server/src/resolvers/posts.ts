@@ -176,7 +176,7 @@ export class PostResolver {
   // Grab a single post
   @Query(() => Post, { nullable: true })
   async post(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { req }: MyContext
   ): Promise<Post | undefined> {
     // Grab the post
