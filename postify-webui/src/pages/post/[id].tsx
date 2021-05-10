@@ -1,8 +1,9 @@
-import { Box, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React from "react";
 import { Layout } from "../../components/Layout";
+import { PostMutationButtons } from "../../components/PostMutationButtons";
 import { usePostQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 
@@ -53,10 +54,16 @@ const Post: React.FC<{}> = ({}) => {
 
   return (
     <Layout>
-      <Box>
+      <Box mb={4}>
         <Heading my={4}>{data.post.title}</Heading>
         <Text>{data.post.text}</Text>
       </Box>
+      <Flex>
+        <PostMutationButtons
+          postId={data.post.id}
+          onDeletePost={() => router.push("/")}
+        />
+      </Flex>
     </Layout>
   );
 };

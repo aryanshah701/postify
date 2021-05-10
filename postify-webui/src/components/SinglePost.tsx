@@ -14,6 +14,7 @@ import {
   useDeletePostMutation,
   useVoteMutation,
 } from "../generated/graphql";
+import { PostMutationButtons } from "./PostMutationButtons";
 
 interface SinglePostProps {
   post: PostSnippetFragment;
@@ -73,25 +74,7 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post, me }) => {
         </Box>
         {post.creator.id === me?.user?.id ? (
           <Flex mt="auto" ml="auto">
-            <NextLink href="post/edit/[id]" as={`post/edit/${post.id}`}>
-              <IconButton
-                icon={<EditIcon />}
-                as={Link}
-                variant="outline"
-                aria-label="Edit post"
-                colorScheme="yellow"
-                mr={2}
-              />
-            </NextLink>
-            <IconButton
-              icon={<DeleteIcon />}
-              variant="outline"
-              aria-label="Delete post"
-              colorScheme="red"
-              onClick={() => {
-                deletePost({ id: post.id });
-              }}
-            />
+            <PostMutationButtons postId={post.id} />
           </Flex>
         ) : null}
       </Flex>
