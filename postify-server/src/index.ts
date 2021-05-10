@@ -23,6 +23,7 @@ import cors from "cors";
 import path from "path";
 import { Vote } from "./entities/Vote";
 import { createUserLoader } from "./utils/createUserLoader";
+import { createVoteLoaderWithUserId } from "./utils/createVoteLoaderWithUserId";
 
 const main = async () => {
   // Init the ORM connection(auto run migrations)
@@ -86,6 +87,7 @@ const main = async () => {
       res,
       redis: redisClient,
       userLoader: createUserLoader(),
+      voteLoaderWithUserId: createVoteLoaderWithUserId(),
     }),
   });
 

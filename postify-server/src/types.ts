@@ -3,6 +3,7 @@ import { InputType, Field, ObjectType } from "type-graphql";
 import { User } from "./entities/User";
 import { Redis } from "ioredis";
 import { Post } from "./entities/Post";
+import { createVoteLoaderWithUserId } from "./utils/createVoteLoaderWithUserId";
 import { createUserLoader } from "./utils/createUserLoader";
 
 // Context object for resovlers
@@ -11,6 +12,7 @@ export type MyContext = {
   res: Response;
   redis: Redis;
   userLoader: ReturnType<typeof createUserLoader>;
+  voteLoaderWithUserId: ReturnType<typeof createVoteLoaderWithUserId>;
 };
 
 // Declaration merging to add fields onto express session object

@@ -30,10 +30,32 @@ export class PostResolver {
     }
   }
 
-  // Use dataloader to load creator field onto posts
+  // Load User from dataloader to load creator field onto posts
   @FieldResolver(() => User)
   creator(@Root() post: Post, @Ctx() { userLoader }: MyContext): Promise<User> {
     return userLoader.load(post.creatorId);
+  }
+
+  // Load vote from dataloader for voteStatus field on posts
+  @FieldResolver(() => Int, { nullable: true })
+  async voteStatus(
+    @Root() post: Post,
+    @Ctx() { voteLoaderWithUserId, req }: MyContext
+  ): Promise<number | null> {
+    if (!req.session.userId) {
+      return null;
+    }
+
+    const vote = await voteLoaderWithUserId.load({
+      postId: post.id,
+      userId: req.session.userId,
+    });
+
+    if (!vote) {
+      return null;
+    }
+
+    return vote.value;
   }
 
   // Upvote or downvote the post
@@ -123,8 +145,7 @@ export class PostResolver {
   @Query(() => PostsResponse)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string,
-    @Ctx() { req }: MyContext
+    @Arg("cursor", () => String, { nullable: true }) cursor: string
   ): Promise<PostsResponse> {
     // Fetch one more than needed to see if there are any more posts
     // left in the db
@@ -132,7 +153,6 @@ export class PostResolver {
     const myLimitPlusOne = myLimit + 1;
 
     // Get limit posts ordered in descending order of createdAt col
-    let userId = req.session.userId;
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("post")
@@ -150,30 +170,8 @@ export class PostResolver {
 
     const posts = await qb.getMany();
 
-    // Add voteStatus on each post
-    const postsToReturn = posts.slice(0, myLimit).map(
-      (p): Post => {
-        // Votestatus is null if the user isn't logged in
-        if (!userId) {
-          p.voteStatus = null;
-          return p;
-        }
-
-        // Search for the user's vote
-        const voteStatus = p.votes.find((v) => v.userId === userId)?.value;
-
-        // Add the vote status field
-        if (voteStatus) {
-          p.voteStatus = voteStatus;
-        } else {
-          p.voteStatus = null;
-        }
-        return p;
-      }
-    );
-
     return {
-      posts: postsToReturn,
+      posts: posts.slice(0, myLimit),
       hasMore: posts.length === myLimitPlusOne,
     };
   }
