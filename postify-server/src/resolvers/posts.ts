@@ -30,6 +30,12 @@ export class PostResolver {
     }
   }
 
+  // Use dataloader to load creator field onto posts
+  @FieldResolver(() => User)
+  creator(@Root() post: Post, @Ctx() { userLoader }: MyContext): Promise<User> {
+    return userLoader.load(post.creatorId);
+  }
+
   // Upvote or downvote the post
   @Mutation(() => VoteResponse)
   @UseMiddleware(ReqAuthentication)
@@ -130,7 +136,6 @@ export class PostResolver {
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("post")
-      .leftJoinAndSelect("post.creator", "creator")
       .leftJoinAndSelect("post.votes", "votes")
       .leftJoinAndSelect("votes.user", "user")
       .take(myLimitPlusOne)
@@ -181,7 +186,7 @@ export class PostResolver {
   ): Promise<Post | undefined> {
     // Grab the post
     const post = await Post.findOne(id, {
-      relations: ["creator", "votes", "votes.user"],
+      relations: ["votes", "votes.user"],
     });
 
     // Add the voteStatus field if logged in
