@@ -38,9 +38,11 @@ const Index = () => {
       </Flex>
       {data && !fetching ? (
         <Stack spacing={8}>
-          {data.posts.posts.map((post) => (
-            <SinglePost key={post.id} post={post} me={meData?.me} />
-          ))}
+          {data.posts.posts.map((post) =>
+            !post ? null : (
+              <SinglePost key={post.id} post={post} me={meData?.me} />
+            )
+          )}
         </Stack>
       ) : null}
       {data && data.posts.hasMore ? (
