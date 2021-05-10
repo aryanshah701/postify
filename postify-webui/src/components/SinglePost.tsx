@@ -1,4 +1,9 @@
-import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  DeleteIcon,
+  EditIcon,
+} from "@chakra-ui/icons";
 import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import React, { useState } from "react";
@@ -50,33 +55,46 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post, me }) => {
           colorScheme={post.voteStatus === -1 ? "red" : undefined}
         />
       </Flex>
-      <Box flex={1}>
-        <Flex mb={2}>
-          <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-            <Link>
-              <Heading mr={2} mb={2} fontSize="xl">
-                {post.title}
-              </Heading>
-            </Link>
-          </NextLink>
-          <Text as="cite">posted by {post.creator.username}</Text>
-          {post.creator.id === me?.user?.id ? (
+      <Flex flex={1}>
+        <Box>
+          <Flex mb={2}>
+            <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+              <Link>
+                <Heading mr={2} mb={2} fontSize="xl">
+                  {post.title}
+                </Heading>
+              </Link>
+            </NextLink>
+            <Text as="cite">posted by {post.creator.username}</Text>
+          </Flex>
+          <Flex align="center">
+            <Text>{post.textSnippet}</Text>
+          </Flex>
+        </Box>
+        {post.creator.id === me?.user?.id ? (
+          <Flex mt="auto" ml="auto">
+            <NextLink href="post/edit/[id]" as={`post/edit/${post.id}`}>
+              <IconButton
+                icon={<EditIcon />}
+                as={Link}
+                variant="outline"
+                aria-label="Edit post"
+                colorScheme="yellow"
+                mr={2}
+              />
+            </NextLink>
             <IconButton
               icon={<DeleteIcon />}
               variant="outline"
               aria-label="Delete post"
               colorScheme="red"
-              ml="auto"
               onClick={() => {
                 deletePost({ id: post.id });
               }}
             />
-          ) : null}
-        </Flex>
-        <Flex align="center">
-          <Text>{post.textSnippet}</Text>
-        </Flex>
-      </Box>
+          </Flex>
+        ) : null}
+      </Flex>
     </Flex>
   );
 };
