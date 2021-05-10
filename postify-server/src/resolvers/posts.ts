@@ -216,25 +216,23 @@ export class PostResolver {
 
   // Update a single post
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(ReqAuthentication)
   async updatePost(
     @Arg("id") id: number,
-    @Arg("title", () => String, { nullable: true }) title: string
+    @Arg("title") title: string,
+    @Arg("text") text: string,
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    // Find the post
-    const postToUpdate = await Post.findOne(id);
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({ text, title })
+      .where("id = :id", { id })
+      .andWhere('"creatorId" = :creatorId', { creatorId: req.session.userId })
+      .returning("*")
+      .execute();
 
-    // If the post is not found, return null
-    if (!postToUpdate) {
-      return null;
-    }
-
-    // If the title is provided, update the title
-    if (title) {
-      postToUpdate.title = title;
-      await Post.update({ id }, { title });
-    }
-
-    return postToUpdate;
+    return result.raw[0];
   }
 
   // Delete a Post
