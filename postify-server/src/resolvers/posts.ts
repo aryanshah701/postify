@@ -11,13 +11,21 @@ import {
   Root,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
-import { MyContext, PostInput, PostsResponse, VoteResponse } from "../types";
+import {
+  HierarchicalComment,
+  MyContext,
+  PostInput,
+  PostsResponse,
+  VoteResponse,
+} from "../types";
 import { getConnection } from "typeorm";
 import { PAGINATION_MAX } from "../constants";
 import { User } from "../entities/User";
 import { Vote } from "../entities/Vote";
+import { Comment } from "../entities/Comment";
+import { arrangeCommentsHierarchically } from "../utils/arrangeCommentsHierarchically";
 
-// Resolver for CRUD operations for Posts
+// Resolver for CRUD operations for Posts and associated relaitionships such as Votes, Comments
 @Resolver(Post)
 export class PostResolver {
   // Provide a text snippet field
@@ -36,6 +44,17 @@ export class PostResolver {
     return userLoader.load(post.creatorId);
   }
 
+  // Load comments for a post
+  @FieldResolver(() => [HierarchicalComment])
+  async hcomments(@Root() post: Post): Promise<HierarchicalComment[]> {
+    // Grab all the comments associated to the post
+    const comments = await Comment.find({ where: { postId: post.id } });
+
+    // Arrange them in the heirarchial order
+    const hComments = arrangeCommentsHierarchically(comments);
+
+    return hComments;
+  }
   // Load vote from dataloader for voteStatus field on posts
   @FieldResolver(() => Int, { nullable: true })
   async voteStatus(
@@ -56,6 +75,39 @@ export class PostResolver {
     }
 
     return vote.value;
+  }
+
+  // Create a comment for a post
+  @Mutation(() => Boolean)
+  @UseMiddleware(ReqAuthentication)
+  async comment(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("parentId", () => Int, { nullable: true })
+    parentId: number,
+    @Arg("text") text: string,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    // Ensure the parent comment id is valid
+    if (parentId) {
+      const parentComment = await Comment.findOne({
+        where: { postId, id: parentId },
+      });
+
+      // Invalid if parentComment doesn't exist or isn't from this post
+      if (!parentComment || parentComment.postId !== postId) {
+        return false;
+      }
+    }
+
+    // Insert the comment
+    await Comment.create({
+      postId,
+      userId: req.session.userId!,
+      parentId,
+      text,
+    }).save();
+
+    return true;
   }
 
   // Upvote or downvote the post
@@ -178,10 +230,7 @@ export class PostResolver {
 
   // Grab a single post
   @Query(() => Post, { nullable: true })
-  async post(
-    @Arg("id", () => Int) id: number,
-    @Ctx() { req }: MyContext
-  ): Promise<Post | undefined> {
+  async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
     // Grab the post
     const post = await Post.findOne(id, {
       relations: ["votes", "votes.user"],
