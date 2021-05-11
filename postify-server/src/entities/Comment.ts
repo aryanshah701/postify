@@ -6,6 +6,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Post } from "./Post";
@@ -15,6 +16,10 @@ import { User } from "./User";
 @ObjectType()
 @Entity()
 export class Comment extends BaseEntity {
+  @Field()
+  @PrimaryGeneratedColumn()
+  id!: number;
+
   @Field(() => Int)
   @PrimaryColumn()
   postId!: number;
@@ -32,9 +37,9 @@ export class Comment extends BaseEntity {
   @ManyToOne(() => User, (user) => user.votes)
   user: User;
 
-  @Field(() => Comment)
-  @Column({ type: "text", nullable: true })
-  parentId: Comment;
+  @Field(() => Int)
+  @Column({ nullable: true })
+  parentId: number;
 
   @Field()
   @Column()
