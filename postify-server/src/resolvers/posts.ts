@@ -77,6 +77,12 @@ export class PostResolver {
     return vote.value;
   }
 
+  // Flat comment query not supported, one hierarchial query is through hcomments
+  @FieldResolver(() => [Comment])
+  comments(): Comment[] {
+    return [];
+  }
+
   // Create a comment for a post
   @Mutation(() => Boolean)
   @UseMiddleware(ReqAuthentication)
