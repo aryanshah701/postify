@@ -84,7 +84,7 @@ export class PostResolver {
   }
 
   // Create a comment for a post
-  @Mutation(() => Boolean)
+  @Mutation(() => Comment, { nullable: true })
   @UseMiddleware(ReqAuthentication)
   async comment(
     @Arg("postId", () => Int) postId: number,
@@ -92,7 +92,7 @@ export class PostResolver {
     parentId: number,
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
-  ): Promise<boolean> {
+  ): Promise<Comment | null> {
     // Ensure the parent comment id is valid
     if (parentId) {
       const parentComment = await Comment.findOne({
@@ -101,19 +101,18 @@ export class PostResolver {
 
       // Invalid if parentComment doesn't exist or isn't from this post
       if (!parentComment || parentComment.postId !== postId) {
-        return false;
+        return null;
       }
     }
 
     // Insert the comment
-    await Comment.create({
+    const comment = await Comment.create({
       postId,
       userId: req.session.userId!,
       parentId,
       text,
     }).save();
-
-    return true;
+    return comment;
   }
 
   // Upvote or downvote the post
