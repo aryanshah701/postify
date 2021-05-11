@@ -1,9 +1,13 @@
-// ORM imports
+// ORM and db imports
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { CLIENT_URL, __prod__ } from "./constants";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
+import { Vote } from "./entities/Vote";
+import { Comment } from "./entities/Comment";
+import { createUserLoader } from "./utils/createUserLoader";
+import { createVoteLoaderWithUserId } from "./utils/createVoteLoaderWithUserId";
 
 // Express, Apollo Server and GraphQL imports
 import { ApolloServer } from "apollo-server-express";
@@ -21,9 +25,6 @@ import { MyContext } from "./types";
 
 import cors from "cors";
 import path from "path";
-import { Vote } from "./entities/Vote";
-import { createUserLoader } from "./utils/createUserLoader";
-import { createVoteLoaderWithUserId } from "./utils/createVoteLoaderWithUserId";
 
 const main = async () => {
   // Init the ORM connection(auto run migrations)
@@ -34,7 +35,7 @@ const main = async () => {
     password: "postgres",
     logging: true,
     synchronize: true,
-    entities: [Post, User, Vote],
+    entities: [Post, User, Vote, Comment],
     migrations: [path.join(__dirname, "./migrations/*")],
   });
 
