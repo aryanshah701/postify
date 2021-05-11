@@ -3,6 +3,7 @@ import { InputType, Field, ObjectType } from "type-graphql";
 import { User } from "./entities/User";
 import { Redis } from "ioredis";
 import { Post } from "./entities/Post";
+import { Comment } from "./entities/Comment";
 import { createVoteLoaderWithUserId } from "./utils/createVoteLoaderWithUserId";
 import { createUserLoader } from "./utils/createUserLoader";
 
@@ -79,4 +80,14 @@ export class VoteResponse {
 
   @Field()
   isSuccessful: Boolean;
+}
+
+// The hierarchical comments structure returned by graphql
+@ObjectType()
+export class HierarchicalComment {
+  @Field(() => Comment)
+  comment: Comment;
+
+  @Field(() => [HierarchicalComment], { nullable: false })
+  children?: HierarchicalComment[];
 }
