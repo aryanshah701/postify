@@ -187,18 +187,6 @@ export class PostResolver {
       relations: ["votes", "votes.user"],
     });
 
-    // Add the voteStatus field if logged in
-    const userId = req.session.userId;
-    let voteStatus = null;
-    if (userId) {
-      voteStatus = post?.votes.find((v) => v.userId === userId)?.value;
-      voteStatus = voteStatus ? voteStatus : null;
-    }
-
-    if (post) {
-      post.voteStatus = voteStatus;
-    }
-
     return post;
   }
 
