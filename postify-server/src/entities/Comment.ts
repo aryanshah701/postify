@@ -37,9 +37,9 @@ export class Comment extends BaseEntity {
   @ManyToOne(() => User, (user) => user.votes)
   user: User;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @Column({ nullable: true })
-  parentId: number;
+  parentId?: number;
 
   @Field()
   @Column()
