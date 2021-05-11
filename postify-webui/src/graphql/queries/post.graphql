@@ -10,5 +10,8 @@ query Post($id: Int!) {
       id
       username
     }
+    hcomments {
+      ...CommentsRecursive
+    }
   }
 }

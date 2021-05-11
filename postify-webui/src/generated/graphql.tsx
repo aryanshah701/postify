@@ -14,14 +14,33 @@ export type Scalars = {
   Float: number;
 };
 
+export type Comment = {
+  __typename?: 'Comment';
+  id: Scalars['Float'];
+  postId: Scalars['Int'];
+  userId: Scalars['Int'];
+  user: User;
+  parentId?: Maybe<Scalars['Int']>;
+  text: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field?: Maybe<Scalars['String']>;
   message: Scalars['String'];
 };
 
+export type HierarchicalComment = {
+  __typename?: 'HierarchicalComment';
+  comment: Comment;
+  children: Array<HierarchicalComment>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  comment?: Maybe<Comment>;
   vote: VoteResponse;
   createPost: Post;
   updatePost?: Maybe<Post>;
@@ -31,6 +50,13 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
   changePassword: UserResponse;
+};
+
+
+export type MutationCommentArgs = {
+  text: Scalars['String'];
+  parentId?: Maybe<Scalars['Int']>;
+  postId: Scalars['Int'];
 };
 
 
@@ -87,10 +113,12 @@ export type Post = {
   creatorId: Scalars['Float'];
   creator: User;
   votes: Array<Vote>;
+  comments: Array<Comment>;
   voteStatus?: Maybe<Scalars['Int']>;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   textSnippet: Scalars['String'];
+  hcomments: Array<HierarchicalComment>;
 };
 
 export type PostInput = {
@@ -129,6 +157,7 @@ export type User = {
   username: Scalars['String'];
   email: Scalars['String'];
   votes: Vote;
+  comments: Array<Comment>;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -158,6 +187,36 @@ export type VoteResponse = {
   errors?: Maybe<Array<FieldError>>;
   isSuccessful: Scalars['Boolean'];
 };
+
+export type CommentFieldsFragment = (
+  { __typename?: 'Comment' }
+  & Pick<Comment, 'id' | 'parentId' | 'text'>
+);
+
+export type CommentsRecursiveFragment = (
+  { __typename?: 'HierarchicalComment' }
+  & { children: Array<(
+    { __typename?: 'HierarchicalComment' }
+    & { children: Array<(
+      { __typename?: 'HierarchicalComment' }
+      & { children: Array<(
+        { __typename?: 'HierarchicalComment' }
+        & HCommentFieldsFragment
+      )> }
+      & HCommentFieldsFragment
+    )> }
+    & HCommentFieldsFragment
+  )> }
+  & HCommentFieldsFragment
+);
+
+export type HCommentFieldsFragment = (
+  { __typename?: 'HierarchicalComment' }
+  & { comment: (
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  ) }
+);
 
 export type PostSnippetFragment = (
   { __typename?: 'Post' }
@@ -201,6 +260,21 @@ export type ChangePasswordMutation = (
     { __typename?: 'UserResponse' }
     & RegularUserResponseFragment
   ) }
+);
+
+export type CommentMutationVariables = Exact<{
+  postId: Scalars['Int'];
+  parentId?: Maybe<Scalars['Int']>;
+  text: Scalars['String'];
+}>;
+
+
+export type CommentMutation = (
+  { __typename?: 'Mutation' }
+  & { comment?: Maybe<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
 );
 
 export type CreatePostMutationVariables = Exact<{
@@ -330,7 +404,10 @@ export type PostQuery = (
     & { creator: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'username'>
-    ) }
+    ), hcomments: Array<(
+      { __typename?: 'HierarchicalComment' }
+      & CommentsRecursiveFragment
+    )> }
   )> }
 );
 
@@ -352,6 +429,34 @@ export type PostsQuery = (
   ) }
 );
 
+export const CommentFieldsFragmentDoc = gql`
+    fragment CommentFields on Comment {
+  id
+  parentId
+  text
+}
+    `;
+export const HCommentFieldsFragmentDoc = gql`
+    fragment HCommentFields on HierarchicalComment {
+  comment {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+export const CommentsRecursiveFragmentDoc = gql`
+    fragment CommentsRecursive on HierarchicalComment {
+  ...HCommentFields
+  children {
+    ...HCommentFields
+    children {
+      ...HCommentFields
+      children {
+        ...HCommentFields
+      }
+    }
+  }
+}
+    ${HCommentFieldsFragmentDoc}`;
 export const PostSnippetFragmentDoc = gql`
     fragment PostSnippet on Post {
   id
@@ -400,6 +505,17 @@ export const ChangePasswordDocument = gql`
 
 export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
+export const CommentDocument = gql`
+    mutation Comment($postId: Int!, $parentId: Int, $text: String!) {
+  comment(postId: $postId, parentId: $parentId, text: $text) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+
+export function useCommentMutation() {
+  return Urql.useMutation<CommentMutation, CommentMutationVariables>(CommentDocument);
 };
 export const CreatePostDocument = gql`
     mutation CreatePost($options: PostInput!) {
@@ -520,9 +636,12 @@ export const PostDocument = gql`
       id
       username
     }
+    hcomments {
+      ...CommentsRecursive
+    }
   }
 }
-    `;
+    ${CommentsRecursiveFragmentDoc}`;
 
 export function usePostQuery(options: Omit<Urql.UseQueryArgs<PostQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });

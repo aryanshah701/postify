@@ -64,6 +64,12 @@ const Post: React.FC<{}> = ({}) => {
           onDeletePost={() => router.push("/")}
         />
       </Flex>
+      <Box>
+        <Heading as="h2">Comments</Heading>
+        {data.post.hcomments.map((hcomment) => (
+          <Text>{hcomment.comment.text}</Text>
+        ))}
+      </Box>
     </Layout>
   );
 };

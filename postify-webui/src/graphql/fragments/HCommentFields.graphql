@@ -1,0 +1,5 @@
+fragment HCommentFields on HierarchicalComment {
+  comment {
+    ...CommentFields
+  }
+}
