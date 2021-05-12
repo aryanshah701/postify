@@ -10,14 +10,16 @@ interface HCommentsProps {
 // The component to display all comments on a post in hierarchical fassion
 export const HComments: React.FC<HCommentsProps> = ({ hcomments }) => {
   const hcommentsComponent = hcomments.map((hcomment) => (
-    <HComment
-      key={hcomment.id}
-      ml={4}
-      borderLeft="2px"
-      borderColor="gray.200"
-      pl={2}
-      hcomment={hcomment}
-    />
+    <Box my={4}>
+      <HComment
+        key={hcomment.id}
+        ml={4}
+        borderLeft="2px"
+        borderColor="gray.200"
+        pl={2}
+        hcomment={hcomment}
+      />
+    </Box>
   ));
 
   return (

@@ -65,6 +65,8 @@ const Post: React.FC<{}> = ({}) => {
           <PostMutationButtons
             postId={data.post.id}
             onDeletePost={() => router.push("/")}
+            editHref="edit/[id]"
+            editAs={`edit/${data.post.id}`}
           />
         ) : null}
       </Flex>

@@ -7,17 +7,21 @@ import { useDeletePostMutation } from "../generated/graphql";
 interface PostMutationButtonsProps {
   postId: number;
   onDeletePost?: () => void;
+  editHref: string;
+  editAs: string;
 }
 
 export const PostMutationButtons: React.FC<PostMutationButtonsProps> = ({
   postId,
   onDeletePost,
+  editHref,
+  editAs,
 }) => {
   const [{ fetching }, deletePost] = useDeletePostMutation();
 
   return (
     <>
-      <NextLink href="post/edit/[id]" as={`post/edit/${postId}`}>
+      <NextLink href={editHref} as={editAs}>
         <IconButton
           icon={<EditIcon />}
           as={Link}

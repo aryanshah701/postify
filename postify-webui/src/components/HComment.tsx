@@ -17,7 +17,7 @@ interface HCommentProps extends ChakraProps {
 //Recursive component: A Hierarchical Comment with all of its direct and indirect children(replies)
 export const HComment: React.FC<HCommentProps> = ({ hcomment, ...props }) => {
   return (
-    <>
+    <Box my={4}>
       <Comment comment={hcomment.comment} />
       {hcomment.children ? (
         <Box {...props}>
@@ -33,6 +33,6 @@ export const HComment: React.FC<HCommentProps> = ({ hcomment, ...props }) => {
           ))}
         </Box>
       ) : null}
-    </>
+    </Box>
   );
 };

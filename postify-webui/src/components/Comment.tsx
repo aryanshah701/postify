@@ -6,7 +6,6 @@ import {
   Button,
   ChakraProps,
   Flex,
-  FormControl,
   Heading,
   Text,
   Textarea,
@@ -26,7 +25,7 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
   const [showForm, setShowForm] = useState<"none" | "edit" | "reply">("none");
 
   return (
-    <Box my={4}>
+    <Box my={2}>
       <Box mb={2}>
         <Heading mb={2} as="h4" size="sm">
           {comment.user.username}
@@ -35,7 +34,7 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
           {comment.text}
         </Text>
       </Box>
-      <Flex mb={4}>
+      <Flex mb={2}>
         <Button
           mr={2}
           color="gray.700"
@@ -68,7 +67,6 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
               />
               <Button
                 size="xs"
-                mt={4}
                 colorScheme="teal"
                 onClick={() => console.log(reply)}
               >
@@ -84,7 +82,6 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
               />
               <Button
                 size="xs"
-                mt={4}
                 colorScheme="teal"
                 onClick={() => console.log(edit)}
               >

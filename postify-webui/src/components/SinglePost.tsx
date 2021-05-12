@@ -74,7 +74,11 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post, me }) => {
         </Box>
         {post.creator.id === me?.user?.id ? (
           <Flex mt="auto" ml="auto">
-            <PostMutationButtons postId={post.id} />
+            <PostMutationButtons
+              postId={post.id}
+              editHref="post/edit/[id]"
+              editAs={`post/edit/${post.id}`}
+            />
           </Flex>
         ) : null}
       </Flex>
