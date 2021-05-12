@@ -18,7 +18,7 @@ const NavBrand: React.FC<{}> = ({}) => {
 
 export const Nav: React.FC<NavProps> = ({}) => {
   // Get the current user
-  const [{ data, fetching }] = useMeQuery({ pause: isServer() });
+  const [{ data, fetching }] = useMeQuery();
   const [{ fetching: isLoadingFetching }, logout] = useLogoutMutation();
 
   // The right portion of the nav
