@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { Layout } from "../../components/Layout";
 import { PostMutationButtons } from "../../components/PostMutationButtons";
-import { usePostQuery } from "../../generated/graphql";
+import { useMeQuery, usePostQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 
 const Post: React.FC<{}> = ({}) => {
@@ -13,6 +13,7 @@ const Post: React.FC<{}> = ({}) => {
   const intId = parseInt(
     typeof router.query.id === "string" ? router.query.id : "-1"
   );
+  const [{ data: meData }] = useMeQuery();
 
   // Grab the post
   const [{ data, fetching, error }] = usePostQuery({
@@ -59,13 +60,15 @@ const Post: React.FC<{}> = ({}) => {
         <Text>{data.post.text}</Text>
       </Box>
       <Flex>
-        <PostMutationButtons
-          postId={data.post.id}
-          onDeletePost={() => router.push("/")}
-        />
+        {data.post.creator.id === meData?.me.user?.id ? (
+          <PostMutationButtons
+            postId={data.post.id}
+            onDeletePost={() => router.push("/")}
+          />
+        ) : null}
       </Flex>
       <Box>
-        <Heading as="h2">Comments</Heading>
+        <br />
         {data.post.hcomments.map((hcomment) => (
           <Text>{hcomment.comment.text}</Text>
         ))}
