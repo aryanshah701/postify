@@ -27,7 +27,7 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
   return (
     <Box my={2}>
       <Box mb={2}>
-        <Heading mb={2} as="h4" size="sm">
+        <Heading mb={1} as="h4" size="sm">
           {comment.user.username}
         </Heading>
         <Text lineHeight={1.2} {...props}>
