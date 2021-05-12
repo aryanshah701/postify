@@ -36,5 +36,5 @@ const arrangeCommentHierarchically = (
     hChildren.push(hChild);
   });
 
-  return { comment, children: hChildren };
+  return { id: comment.id, comment, children: hChildren };
 };

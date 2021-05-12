@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { InputType, Field, ObjectType } from "type-graphql";
+import { InputType, Field, ObjectType, Int } from "type-graphql";
 import { User } from "./entities/User";
 import { Redis } from "ioredis";
 import { Post } from "./entities/Post";
@@ -85,6 +85,9 @@ export class VoteResponse {
 // The hierarchical comments structure returned by graphql
 @ObjectType()
 export class HierarchicalComment {
+  @Field(() => Int)
+  id: number;
+
   @Field(() => Comment)
   comment: Comment;
 
