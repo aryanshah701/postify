@@ -34,6 +34,7 @@ export type FieldError = {
 
 export type HierarchicalComment = {
   __typename?: 'HierarchicalComment';
+  id: Scalars['Int'];
   comment: Comment;
   children: Array<HierarchicalComment>;
 };
@@ -191,6 +192,10 @@ export type VoteResponse = {
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
   & Pick<Comment, 'id' | 'parentId' | 'text'>
+  & { user: (
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'username'>
+  ) }
 );
 
 export type CommentsRecursiveFragment = (
@@ -212,6 +217,7 @@ export type CommentsRecursiveFragment = (
 
 export type HCommentFieldsFragment = (
   { __typename?: 'HierarchicalComment' }
+  & Pick<HierarchicalComment, 'id'>
   & { comment: (
     { __typename?: 'Comment' }
     & CommentFieldsFragment
@@ -434,10 +440,15 @@ export const CommentFieldsFragmentDoc = gql`
   id
   parentId
   text
+  user {
+    id
+    username
+  }
 }
     `;
 export const HCommentFieldsFragmentDoc = gql`
     fragment HCommentFields on HierarchicalComment {
+  id
   comment {
     ...CommentFields
   }

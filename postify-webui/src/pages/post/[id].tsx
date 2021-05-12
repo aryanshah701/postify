@@ -2,6 +2,7 @@ import { Box, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React from "react";
+import { HComments } from "../../components/HComments";
 import { Layout } from "../../components/Layout";
 import { PostMutationButtons } from "../../components/PostMutationButtons";
 import { useMeQuery, usePostQuery } from "../../generated/graphql";
@@ -68,10 +69,7 @@ const Post: React.FC<{}> = ({}) => {
         ) : null}
       </Flex>
       <Box>
-        <br />
-        {data.post.hcomments.map((hcomment) => (
-          <Text>{hcomment.comment.text}</Text>
-        ))}
+        <HComments hcomments={data.post.hcomments} />
       </Box>
     </Layout>
   );
