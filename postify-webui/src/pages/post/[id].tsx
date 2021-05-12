@@ -77,4 +77,4 @@ const Post: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Post);
+export default withUrqlClient(createUrqlClient, { ssr: true })(Post);
