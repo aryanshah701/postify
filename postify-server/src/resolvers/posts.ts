@@ -48,7 +48,10 @@ export class PostResolver {
   @FieldResolver(() => [HierarchicalComment])
   async hcomments(@Root() post: Post): Promise<HierarchicalComment[]> {
     // Grab all the comments associated to the post
-    const comments = await Comment.find({ where: { postId: post.id } });
+    const comments = await Comment.find({
+      where: { postId: post.id },
+      relations: ["user"],
+    });
 
     // Arrange them in the heirarchial order
     const hComments = arrangeCommentsHierarchically(comments);
@@ -92,7 +95,7 @@ export class PostResolver {
     parentId: number,
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
-  ): Promise<Comment | null> {
+  ): Promise<Comment | undefined | null> {
     // Ensure the parent comment id is valid
     if (parentId) {
       const parentComment = await Comment.findOne({
@@ -106,13 +109,22 @@ export class PostResolver {
     }
 
     // Insert the comment
+    const userId = req.session.userId!;
     const comment = await Comment.create({
       postId,
-      userId: req.session.userId!,
+      userId,
       parentId,
       text,
     }).save();
-    return comment;
+
+    const commentWithRelations = await Comment.findOne(
+      { id: comment.id, postId, userId },
+      {
+        relations: ["user"],
+      }
+    );
+
+    return commentWithRelations;
   }
 
   // Upvote or downvote the post
