@@ -10,25 +10,46 @@ type HierarchicalComment = {
 export const addNewCommentToCache = (
   hcomments: HierarchicalComment[],
   newComment: CommentFieldsFragment
-) => {
+): boolean => {
   // Insert the new comment in the  appropriate postition in the hierarchical structure
   for (const hcomment of hcomments) {
-    if (insertIntoHComment(hcomment, newComment)) break;
+    // Should have been inserted here but couldn't since children aren't loaded
+    const rv = insertIntoHComment(hcomment, newComment);
+    if (rv === null) {
+      return false;
+
+      // Successfully inserted
+    } else if (rv) {
+      return true;
+    }
   }
+
+  return true;
 };
 
+/* 
+  Return true or false based on whether it was inserted into this HComment
+  Return null if it was supposed to be inserted into this HComment but wasn't
+  since the parent doesn't have its children array loaded.
+*/
 const insertIntoHComment = (
   hcomment: HierarchicalComment,
   newComment: CommentFieldsFragment
-): boolean => {
+): boolean | null => {
   // Is this level the parent of the new comment, if so insert
   if (hcomment.id === newComment.parentId) {
-    hcomment.children.push({
-      id: newComment.id,
-      comment: newComment,
-      children: [],
-      __typename: "HierarchicalComment",
-    });
+    // If the chidldren field is loaded
+    if (hcomment.children) {
+      hcomment.children.push({
+        id: newComment.id,
+        comment: newComment,
+        children: [],
+        __typename: "HierarchicalComment",
+      });
+    } else {
+      // Children isn't loaded so need to invalidate the cache
+      return null;
+    }
     return true;
   }
 

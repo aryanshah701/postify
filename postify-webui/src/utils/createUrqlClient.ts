@@ -142,10 +142,12 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               // Update the hcomments in the cached post
               const cachedHComments = cacheData.post?.hcomments;
 
-              addNewCommentToCache(
+              const rv = addNewCommentToCache(
                 cachedHComments as any,
                 result.comment as CommentFieldsFragment
               );
+
+              // If the comment wasn't added, then invalidate the cache
 
               // Write the updated hcomments to the cache
               cache.updateQuery(
