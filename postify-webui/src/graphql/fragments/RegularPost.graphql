@@ -1,0 +1,15 @@
+fragment RegularPost on Post {
+  id
+  title
+  text
+  points
+  voteStatus
+  createdAt
+  creator {
+    id
+    username
+  }
+  hcomments {
+    ...CommentsRecursive
+  }
+}

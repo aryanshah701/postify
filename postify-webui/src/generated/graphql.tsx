@@ -238,6 +238,18 @@ export type RegularErrorFragment = (
   & Pick<FieldError, 'field' | 'message'>
 );
 
+export type RegularPostFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'voteStatus' | 'createdAt'>
+  & { creator: (
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'username'>
+  ), hcomments: Array<(
+    { __typename?: 'HierarchicalComment' }
+    & CommentsRecursiveFragment
+  )> }
+);
+
 export type RegularUserFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'username' | 'email'>
@@ -435,6 +447,20 @@ export type PostsQuery = (
   ) }
 );
 
+export const PostSnippetFragmentDoc = gql`
+    fragment PostSnippet on Post {
+  id
+  title
+  textSnippet
+  points
+  voteStatus
+  createdAt
+  creator {
+    id
+    username
+  }
+}
+    `;
 export const CommentFieldsFragmentDoc = gql`
     fragment CommentFields on Comment {
   id
@@ -468,11 +494,11 @@ export const CommentsRecursiveFragmentDoc = gql`
   }
 }
     ${HCommentFieldsFragmentDoc}`;
-export const PostSnippetFragmentDoc = gql`
-    fragment PostSnippet on Post {
+export const RegularPostFragmentDoc = gql`
+    fragment RegularPost on Post {
   id
   title
-  textSnippet
+  text
   points
   voteStatus
   createdAt
@@ -480,8 +506,11 @@ export const PostSnippetFragmentDoc = gql`
     id
     username
   }
+  hcomments {
+    ...CommentsRecursive
+  }
 }
-    `;
+    ${CommentsRecursiveFragmentDoc}`;
 export const RegularErrorFragmentDoc = gql`
     fragment RegularError on FieldError {
   field
