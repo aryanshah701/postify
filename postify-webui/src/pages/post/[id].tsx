@@ -5,7 +5,12 @@ import React from "react";
 import { HComments } from "../../components/HComments";
 import { Layout } from "../../components/Layout";
 import { PostMutationButtons } from "../../components/PostMutationButtons";
-import { useMeQuery, usePostQuery } from "../../generated/graphql";
+import { VotePost } from "../../components/VotePost";
+import {
+  PostSnippetFragment,
+  useMeQuery,
+  usePostQuery,
+} from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 
 const Post: React.FC<{}> = ({}) => {
@@ -56,19 +61,24 @@ const Post: React.FC<{}> = ({}) => {
 
   return (
     <Layout>
-      <Box mb={4}>
-        <Heading my={4}>{data.post.title}</Heading>
-        <Text>{data.post.text}</Text>
-      </Box>
-      <Flex>
-        {data.post.creator.id === meData?.me.user?.id ? (
-          <PostMutationButtons
-            postId={data.post.id}
-            onDeletePost={() => router.push("/")}
-            editHref="edit/[id]"
-            editAs={`edit/${data.post.id}`}
-          />
-        ) : null}
+      <Flex mb={8}>
+        <VotePost post={data.post as any} />
+        <Box pb={4} ml={4} borderBottom="1px" borderColor="gray.200">
+          <Box mb={4}>
+            <Heading my={4}>{data.post.title}</Heading>
+            <Text>{data.post.text}</Text>
+          </Box>
+          <Flex>
+            {data.post.creator.id === meData?.me.user?.id ? (
+              <PostMutationButtons
+                postId={data.post.id}
+                onDeletePost={() => router.push("/")}
+                editHref="edit/[id]"
+                editAs={`edit/${data.post.id}`}
+              />
+            ) : null}
+          </Flex>
+        </Box>
       </Flex>
       <Box>
         <HComments hcomments={data.post.hcomments} post={data.post} />

@@ -2,7 +2,7 @@ import { Box, Button, Flex, Link } from "@chakra-ui/react";
 import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import { isServer } from "../utils/isServer";
+import { useRouter } from "next/router";
 
 interface NavProps {}
 
@@ -17,6 +17,8 @@ const NavBrand: React.FC<{}> = ({}) => {
 };
 
 export const Nav: React.FC<NavProps> = ({}) => {
+  const router = useRouter();
+
   // Get the current user
   const [{ data, fetching }] = useMeQuery();
   const [{ fetching: isLoadingFetching }, logout] = useLogoutMutation();
@@ -43,7 +45,14 @@ export const Nav: React.FC<NavProps> = ({}) => {
         <Button
           mx="2"
           variant="link"
-          onClick={async () => await logout()}
+          onClick={async () => {
+            await logout();
+
+            // If on some post/[id] then reload the page
+            if (router.pathname.includes("/post")) {
+              router.reload();
+            }
+          }}
           isLoading={isLoadingFetching}
         >
           Logout
