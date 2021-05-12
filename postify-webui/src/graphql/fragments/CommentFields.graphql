@@ -2,4 +2,8 @@ fragment CommentFields on Comment {
   id
   parentId
   text
+  user {
+    id
+    username
+  }
 }

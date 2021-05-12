@@ -1,4 +1,5 @@
 fragment HCommentFields on HierarchicalComment {
+  id
   comment {
     ...CommentFields
   }
