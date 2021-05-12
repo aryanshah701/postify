@@ -71,7 +71,7 @@ const Post: React.FC<{}> = ({}) => {
         ) : null}
       </Flex>
       <Box>
-        <HComments hcomments={data.post.hcomments} />
+        <HComments hcomments={data.post.hcomments} post={data.post} />
       </Box>
     </Layout>
   );

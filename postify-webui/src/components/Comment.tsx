@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { CommentFieldsFragment, useMeQuery } from "../generated/graphql";
+import {
+  CommentFieldsFragment,
+  RegularPostFragment,
+  useCommentMutation,
+  useMeQuery,
+} from "../generated/graphql";
 import {
   Input,
   Box,
@@ -13,16 +18,24 @@ import {
 
 interface CommentProps extends ChakraProps {
   comment: CommentFieldsFragment;
+  post: RegularPostFragment;
 }
 
 // A single Comment in a Hierarical comment structure
-export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
+export const Comment: React.FC<CommentProps> = ({
+  comment,
+  post,
+  ...props
+}) => {
   const [{ data: meData }] = useMeQuery();
 
   // State for reply and edit forms
   const [reply, setReply] = useState("");
   const [edit, setEdit] = useState("");
   const [showForm, setShowForm] = useState<"none" | "edit" | "reply">("none");
+
+  // To submit a reply or edit this comment
+  const [{ fetching }, submitReply] = useCommentMutation();
 
   return (
     <Box my={2}>
@@ -68,7 +81,15 @@ export const Comment: React.FC<CommentProps> = ({ comment, ...props }) => {
               <Button
                 size="xs"
                 colorScheme="teal"
-                onClick={() => console.log(reply)}
+                isLoading={fetching}
+                onClick={() => {
+                  // Post a comment with the current comment as the parent
+                  submitReply({
+                    postId: post.id,
+                    parentId: comment.id,
+                    text: reply,
+                  });
+                }}
               >
                 Reply
               </Button>

@@ -1,14 +1,18 @@
 import { Box } from "@chakra-ui/react";
 import React from "react";
-import { CommentsRecursiveFragment } from "../generated/graphql";
+import {
+  CommentsRecursiveFragment,
+  RegularPostFragment,
+} from "../generated/graphql";
 import { HComment } from "./HComment";
 
 interface HCommentsProps {
   hcomments: CommentsRecursiveFragment[];
+  post: RegularPostFragment;
 }
 
 // The component to display all comments on a post in hierarchical fassion
-export const HComments: React.FC<HCommentsProps> = ({ hcomments }) => {
+export const HComments: React.FC<HCommentsProps> = ({ hcomments, post }) => {
   const hcommentsComponent = hcomments.map((hcomment) => (
     <Box my={5}>
       <HComment
@@ -18,6 +22,7 @@ export const HComments: React.FC<HCommentsProps> = ({ hcomments }) => {
         borderColor="gray.200"
         pl={2}
         hcomment={hcomment}
+        post={post}
       />
     </Box>
   ));

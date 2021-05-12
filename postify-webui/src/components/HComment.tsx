@@ -3,6 +3,7 @@ import React from "react";
 import {
   CommentFieldsFragment,
   HCommentFieldsFragment,
+  RegularPostFragment,
 } from "../generated/graphql";
 import { Comment } from "./Comment";
 
@@ -12,13 +13,18 @@ interface HCommentProps extends ChakraProps {
     comment: CommentFieldsFragment;
     children?: HCommentFieldsFragment[];
   };
+  post: RegularPostFragment;
 }
 
 //Recursive component: A Hierarchical Comment with all of its direct and indirect children(replies)
-export const HComment: React.FC<HCommentProps> = ({ hcomment, ...props }) => {
+export const HComment: React.FC<HCommentProps> = ({
+  hcomment,
+  post,
+  ...props
+}) => {
   return (
     <Box my={6}>
-      <Comment comment={hcomment.comment} />
+      <Comment comment={hcomment.comment} post={post} />
       {hcomment.children ? (
         <Box {...props}>
           {hcomment.children.map((child) => (
@@ -29,6 +35,7 @@ export const HComment: React.FC<HCommentProps> = ({ hcomment, ...props }) => {
               borderColor="gray.200"
               pl={2}
               hcomment={child}
+              post={post}
             />
           ))}
         </Box>
