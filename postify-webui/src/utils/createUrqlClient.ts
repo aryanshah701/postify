@@ -8,12 +8,18 @@ import {
   LogoutMutation,
   VoteMutationVariables,
   DeletePostMutationVariables,
+  CommentMutation,
+  PostQuery,
+  PostDocument,
+  CommentMutationVariables,
+  CommentFieldsFragment,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
 import { Exchange } from "urql";
 import Router from "next/router";
 import { isServer } from "./isServer";
+import { addNewCommentToCache } from "./addNewCommentToCache";
 
 // Cursor pagination exchange
 const cursorPagination = (): Resolver => {
@@ -117,6 +123,47 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
         },
         updates: {
           Mutation: {
+            comment: (result, args, cache, _info) => {
+              // Do nothing if the comment wasn't created successfully
+              if (!result.comment) {
+                return;
+              }
+
+              // Grab the cachedPost
+              const { postId } = args as CommentMutationVariables;
+
+              const cacheData = cache.readQuery({
+                query: PostDocument,
+                variables: {
+                  id: postId,
+                },
+              }) as PostQuery;
+
+              // Update the hcomments in the cached post
+              const cachedHComments = cacheData.post?.hcomments;
+
+              addNewCommentToCache(
+                cachedHComments as any,
+                result.comment as CommentFieldsFragment
+              );
+
+              // Write the updated hcomments to the cache
+              cache.updateQuery(
+                {
+                  query: PostDocument,
+                  variables: {
+                    id: postId,
+                  },
+                },
+                (queryData) => {
+                  if (!queryData) {
+                    return null;
+                  }
+                  (queryData!.post! as any).hcomments = cachedHComments;
+                  return queryData;
+                }
+              );
+            },
             deletePost: (_result, args, cache, _info) => {
               // Invalidate the deleted post
               cache.invalidate({
