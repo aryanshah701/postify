@@ -82,13 +82,15 @@ export const Comment: React.FC<CommentProps> = ({
                 size="xs"
                 colorScheme="teal"
                 isLoading={fetching}
-                onClick={() => {
+                onClick={async () => {
                   // Post a comment with the current comment as the parent
-                  submitReply({
+                  await submitReply({
                     postId: post.id,
                     parentId: comment.id,
                     text: reply,
                   });
+                  setShowForm("none");
+                  setReply("");
                 }}
               >
                 Reply
