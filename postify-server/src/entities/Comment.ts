@@ -45,6 +45,10 @@ export class Comment extends BaseEntity {
   @Column()
   text: string;
 
+  @Field()
+  @Column()
+  depth: number;
+
   @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;

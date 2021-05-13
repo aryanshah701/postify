@@ -41,6 +41,7 @@ const main = async () => {
 
   await conn.runMigrations();
   // await Post.delete({});
+  // await Comment.delete({});
 
   // Conifgure Express
   const app = express();

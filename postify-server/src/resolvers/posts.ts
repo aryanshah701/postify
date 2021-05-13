@@ -97,6 +97,7 @@ export class PostResolver {
     @Ctx() { req }: MyContext
   ): Promise<Comment | undefined | null> {
     // Ensure the parent comment id is valid
+    let depth = 0;
     if (parentId) {
       const parentComment = await Comment.findOne({
         where: { postId, id: parentId },
@@ -106,6 +107,8 @@ export class PostResolver {
       if (!parentComment || parentComment.postId !== postId) {
         return null;
       }
+
+      depth = parentComment.depth + 1;
     }
 
     // Insert the comment
@@ -115,6 +118,7 @@ export class PostResolver {
       userId,
       parentId,
       text,
+      depth,
     }).save();
 
     const commentWithRelations = await Comment.findOne(
