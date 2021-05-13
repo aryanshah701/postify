@@ -42,6 +42,7 @@ export type HierarchicalComment = {
 export type Mutation = {
   __typename?: 'Mutation';
   comment?: Maybe<Comment>;
+  updateComment?: Maybe<Comment>;
   vote: VoteResponse;
   createPost: Post;
   updatePost?: Maybe<Post>;
@@ -58,6 +59,12 @@ export type MutationCommentArgs = {
   text: Scalars['String'];
   parentId?: Maybe<Scalars['Int']>;
   postId: Scalars['Int'];
+};
+
+
+export type MutationUpdateCommentArgs = {
+  text: Scalars['String'];
+  id: Scalars['Int'];
 };
 
 
@@ -365,6 +372,20 @@ export type RegisterMutation = (
   ) }
 );
 
+export type UpdateCommentMutationVariables = Exact<{
+  id: Scalars['Int'];
+  text: Scalars['String'];
+}>;
+
+
+export type UpdateCommentMutation = (
+  { __typename?: 'Mutation' }
+  & { updateComment?: Maybe<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['Int'];
   title: Scalars['String'];
@@ -621,6 +642,17 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const UpdateCommentDocument = gql`
+    mutation UpdateComment($id: Int!, $text: String!) {
+  updateComment(id: $id, text: $text) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+
+export function useUpdateCommentMutation() {
+  return Urql.useMutation<UpdateCommentMutation, UpdateCommentMutationVariables>(UpdateCommentDocument);
 };
 export const UpdatePostDocument = gql`
     mutation UpdatePost($id: Int!, $title: String!, $text: String!) {
