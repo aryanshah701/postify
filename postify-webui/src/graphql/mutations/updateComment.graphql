@@ -1,5 +1,6 @@
-mutation UpdateComment($id: Int!, $text: String!) {
-  updateComment(id: $id, text: $text) {
-    ...CommentFields
+mutation UpdateComment($id: Int!, $postId: Int!, $text: String!) {
+  updateComment(id: $id, postId: $postId, text: $text) {
+    id
+    text
   }
 }

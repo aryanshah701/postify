@@ -20,6 +20,7 @@ import { Exchange } from "urql";
 import Router from "next/router";
 import { isServer } from "./isServer";
 import { addNewCommentToCache } from "./addNewCommentToCache";
+import { updateCommentInCache } from "./updateCommentInCache";
 
 // Cursor pagination exchange
 const cursorPagination = (): Resolver => {
@@ -123,6 +124,46 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
         },
         updates: {
           Mutation: {
+            updateComment: (result, args, cache, _info) => {
+              // Do nothing if the comment wasn't editted successfully
+              if (!result.updateComment) {
+                return;
+              }
+
+              // Grab the cachedPost
+              const { postId } = args as CommentMutationVariables;
+
+              const cacheData = cache.readQuery({
+                query: PostDocument,
+                variables: {
+                  id: postId,
+                },
+              }) as PostQuery;
+
+              // Update the hcomments in the cached post
+              const cachedHComments = cacheData.post?.hcomments as any;
+              const updatedComment = result.updateComment as CommentFieldsFragment;
+              console.log("Cached h comments", cachedHComments);
+              console.log("Update comment", updatedComment);
+              const rv = updateCommentInCache(cachedHComments, updatedComment);
+
+              // Write the updated hcomments to the cache
+              cache.updateQuery(
+                {
+                  query: PostDocument,
+                  variables: {
+                    id: postId,
+                  },
+                },
+                (queryData) => {
+                  if (!queryData) {
+                    return null;
+                  }
+                  (queryData!.post! as any).hcomments = cachedHComments;
+                  return queryData;
+                }
+              );
+            },
             comment: (result, args, cache, _info) => {
               // Do nothing if the comment wasn't created successfully
               if (!result.comment) {

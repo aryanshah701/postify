@@ -113,6 +113,7 @@ export const Comment: React.FC<CommentProps> = ({
                   // Edit this comment
                   await editComment({
                     id: comment.id,
+                    postId: post.id,
                     text: edit,
                   });
                   setShowForm("none");
