@@ -39,6 +39,28 @@ export const Comment: React.FC<CommentProps> = ({
   const [{ fetching: fetchingReply }, submitReply] = useCommentMutation();
   const [{ fetching: fetchingEdit }, editComment] = useUpdateCommentMutation();
 
+  const createCommentAction = async () => {
+    // Post a comment with the current comment as the parent
+    await submitReply({
+      postId: post.id,
+      parentId: comment.id,
+      text: reply,
+    });
+    setShowForm("none");
+    setReply("");
+  };
+
+  const editCommentAction = async () => {
+    // Edit this comment
+    await editComment({
+      id: comment.id,
+      postId: post.id,
+      text: edit,
+    });
+    setShowForm("none");
+    setEdit("");
+  };
+
   return (
     <Box my={2}>
       <Box mb={2}>
@@ -50,16 +72,18 @@ export const Comment: React.FC<CommentProps> = ({
         </Text>
       </Box>
       <Flex mb={2}>
-        <Button
-          mr={2}
-          color="gray.700"
-          size="xs"
-          onClick={() => {
-            showForm !== "reply" ? setShowForm("reply") : setShowForm("none");
-          }}
-        >
-          Reply
-        </Button>
+        {comment.depth >= 20 ? null : (
+          <Button
+            mr={2}
+            color="gray.700"
+            size="xs"
+            onClick={() => {
+              showForm !== "reply" ? setShowForm("reply") : setShowForm("none");
+            }}
+          >
+            Reply
+          </Button>
+        )}
         {meData?.me?.user?.username === comment.user.username ? (
           <Button
             color="gray.700"
@@ -72,6 +96,7 @@ export const Comment: React.FC<CommentProps> = ({
           </Button>
         ) : null}
       </Flex>
+
       {showForm !== "none" ? (
         <Box>
           {showForm === "reply" ? (
@@ -84,16 +109,7 @@ export const Comment: React.FC<CommentProps> = ({
                 size="xs"
                 colorScheme="teal"
                 isLoading={fetchingReply}
-                onClick={async () => {
-                  // Post a comment with the current comment as the parent
-                  await submitReply({
-                    postId: post.id,
-                    parentId: comment.id,
-                    text: reply,
-                  });
-                  setShowForm("none");
-                  setReply("");
-                }}
+                onClick={createCommentAction}
               >
                 Reply
               </Button>
@@ -109,16 +125,7 @@ export const Comment: React.FC<CommentProps> = ({
                 size="xs"
                 colorScheme="teal"
                 isLoading={fetchingEdit}
-                onClick={async () => {
-                  // Edit this comment
-                  await editComment({
-                    id: comment.id,
-                    postId: post.id,
-                    text: edit,
-                  });
-                  setShowForm("none");
-                  setEdit("");
-                }}
+                onClick={editCommentAction}
               >
                 Edit
               </Button>
