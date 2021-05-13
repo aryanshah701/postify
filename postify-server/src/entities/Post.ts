@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from "type-graphql";
+import { ObjectType, Field, Int, GraphQLTimestamp } from "type-graphql";
 import {
   Entity,
   Column,
@@ -51,7 +51,7 @@ export class Post extends BaseEntity {
   @Field(() => Int, { nullable: true })
   voteStatus: number | null;
 
-  @Field(() => String)
+  @Field(() => GraphQLTimestamp)
   @CreateDateColumn()
   createdAt: Date;
 

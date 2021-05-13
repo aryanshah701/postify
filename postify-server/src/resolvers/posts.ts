@@ -9,6 +9,7 @@ import {
   Int,
   FieldResolver,
   Root,
+  GraphQLTimestamp,
 } from "type-graphql";
 import { ReqAuthentication } from "../middleware/reqAuthentication";
 import {
@@ -250,7 +251,7 @@ export class PostResolver {
   @Query(() => PostsResponse)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string
+    @Arg("cursor", () => GraphQLTimestamp, { nullable: true }) cursor: number
   ): Promise<PostsResponse> {
     // Fetch one more than needed to see if there are any more posts
     // left in the db
@@ -269,7 +270,7 @@ export class PostResolver {
     // Start at cursor if given
     if (cursor) {
       qb.where('post."createdAt" < :cursor', {
-        cursor: new Date(parseInt(cursor)),
+        cursor: new Date(cursor),
       });
     }
 
