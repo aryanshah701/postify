@@ -1,19 +1,30 @@
-import { Box, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Spinner,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import { HComments } from "../../components/HComments";
 import { Layout } from "../../components/Layout";
 import { PostMutationButtons } from "../../components/PostMutationButtons";
 import { VotePost } from "../../components/VotePost";
 import {
-  PostSnippetFragment,
+  useCommentMutation,
   useMeQuery,
   usePostQuery,
 } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 
 const Post: React.FC<{}> = ({}) => {
+  const [newComment, setNewComment] = useState("");
+  const [{ fetching: postingComment }, createComment] = useCommentMutation();
+
   // Grab the id from the query params
   const router = useRouter();
   const intId = parseInt(
@@ -68,7 +79,7 @@ const Post: React.FC<{}> = ({}) => {
             <Heading my={4}>{data.post.title}</Heading>
             <Text>{data.post.text}</Text>
           </Box>
-          <Flex>
+          <Flex mb={4}>
             {data.post.creator.id === meData?.me.user?.id ? (
               <PostMutationButtons
                 postId={data.post.id}
@@ -78,8 +89,33 @@ const Post: React.FC<{}> = ({}) => {
               />
             ) : null}
           </Flex>
+          <Box>
+            <Textarea
+              placeholder="What are your thoughts?"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <Button
+              size="sm"
+              colorScheme="teal"
+              isLoading={postingComment}
+              onClick={async () => {
+                // Post a comment with no parent
+                await createComment({
+                  postId: data.post!.id,
+                  text: newComment,
+                });
+
+                // Clear the comment
+                setNewComment("");
+              }}
+            >
+              Comment
+            </Button>
+          </Box>
         </Box>
       </Flex>
+
       <Box>
         <HComments hcomments={data.post.hcomments} post={data.post} />
       </Box>

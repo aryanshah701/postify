@@ -11,6 +11,18 @@ export const addNewCommentToCache = (
   hcomments: HierarchicalComment[],
   newComment: CommentFieldsFragment
 ): boolean => {
+  // If the new comment's parent is null then insert it at the top level
+  if (!newComment.parentId) {
+    hcomments.push({
+      id: newComment.id,
+      comment: newComment,
+      children: [],
+      __typename: "HierarchicalComment",
+    });
+
+    return true;
+  }
+
   // Insert the new comment in the  appropriate postition in the hierarchical structure
   for (const hcomment of hcomments) {
     // Should have been inserted here but couldn't since children aren't loaded
@@ -46,16 +58,22 @@ const insertIntoHComment = (
         children: [],
         __typename: "HierarchicalComment",
       });
+
+      return true;
     } else {
       // Children isn't loaded so need to invalidate the cache
       return null;
     }
-    return true;
   }
 
   // Try inserting the new comment in any of the children
-  for (const child of hcomment.children) {
-    if (insertIntoHComment(child, newComment)) return true;
+  if (hcomment.children) {
+    for (const child of hcomment.children) {
+      if (insertIntoHComment(child, newComment)) return true;
+    }
+  } else {
+    // Children isn't loaded so need to invalidate the cache
+    return null;
   }
 
   // Couldn't find parent here so return false
