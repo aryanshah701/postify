@@ -111,6 +111,11 @@ export class PostResolver {
       depth = parentComment.depth + 1;
     }
 
+    // Max depth of 30 for comments
+    if (depth > 30) {
+      return null;
+    }
+
     // Insert the comment
     const userId = req.session.userId!;
     const comment = await Comment.create({
