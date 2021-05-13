@@ -12,6 +12,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch. */
+  Timestamp: any;
 };
 
 export type Comment = {
@@ -23,7 +25,7 @@ export type Comment = {
   parentId?: Maybe<Scalars['Int']>;
   text: Scalars['String'];
   depth: Scalars['Float'];
-  createdAt: Scalars['String'];
+  createdAt: Scalars['Timestamp'];
   updatedAt: Scalars['String'];
 };
 
@@ -125,7 +127,7 @@ export type Post = {
   votes: Array<Vote>;
   comments: Array<Comment>;
   voteStatus?: Maybe<Scalars['Int']>;
-  createdAt: Scalars['String'];
+  createdAt: Scalars['Timestamp'];
   updatedAt: Scalars['String'];
   textSnippet: Scalars['String'];
   hcomments: Array<HierarchicalComment>;
@@ -152,7 +154,7 @@ export type Query = {
 
 
 export type QueryPostsArgs = {
-  cursor?: Maybe<Scalars['String']>;
+  cursor?: Maybe<Scalars['Timestamp']>;
   limit: Scalars['Int'];
 };
 
@@ -160,6 +162,7 @@ export type QueryPostsArgs = {
 export type QueryPostArgs = {
   id: Scalars['Int'];
 };
+
 
 export type User = {
   __typename?: 'User';
@@ -200,7 +203,7 @@ export type VoteResponse = {
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
-  & Pick<Comment, 'id' | 'parentId' | 'text' | 'depth'>
+  & Pick<Comment, 'id' | 'parentId' | 'text' | 'depth' | 'createdAt'>
   & { user: (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'username'>
@@ -523,7 +526,7 @@ export type PostQuery = (
 
 export type PostsQueryVariables = Exact<{
   limit: Scalars['Int'];
-  cursor?: Maybe<Scalars['String']>;
+  cursor?: Maybe<Scalars['Timestamp']>;
 }>;
 
 
@@ -559,6 +562,7 @@ export const CommentFieldsFragmentDoc = gql`
   parentId
   text
   depth
+  createdAt
   user {
     id
     username
@@ -843,7 +847,7 @@ export function usePostQuery(options: Omit<Urql.UseQueryArgs<PostQueryVariables>
   return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });
 };
 export const PostsDocument = gql`
-    query Posts($limit: Int!, $cursor: String) {
+    query Posts($limit: Int!, $cursor: Timestamp) {
   posts(limit: $limit, cursor: $cursor) {
     posts {
       ...PostSnippet

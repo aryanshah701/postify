@@ -1,19 +1,11 @@
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  DeleteIcon,
-  EditIcon,
-} from "@chakra-ui/icons";
-import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Link, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import {
-  MeQuery,
   PostSnippetFragment,
   RegularUserResponseFragment,
-  useDeletePostMutation,
-  useVoteMutation,
 } from "../generated/graphql";
+import { timeElapsed } from "../utils/timeElapsed";
 import { PostMutationButtons } from "./PostMutationButtons";
 import { VotePost } from "./VotePost";
 
@@ -37,7 +29,10 @@ export const SinglePost: React.FC<SinglePostProps> = ({ post, me }) => {
                 </Heading>
               </Link>
             </NextLink>
-            <Text as="cite">posted by {post.creator.username}</Text>
+            <Text as="cite">
+              posted by {post.creator.username} {timeElapsed(post.createdAt)}{" "}
+              ago
+            </Text>
           </Flex>
           <Flex align="center">
             <Text>{post.textSnippet}</Text>

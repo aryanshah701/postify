@@ -16,6 +16,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { timeElapsed } from "../utils/timeElapsed";
 
 interface CommentProps extends ChakraProps {
   comment: CommentFieldsFragment;
@@ -64,9 +65,9 @@ export const Comment: React.FC<CommentProps> = ({
   return (
     <Box my={2}>
       <Box mb={2}>
-        <Heading mb={1} as="h4" size="sm">
-          {comment.user.username}
-        </Heading>
+        <Text mb={1} as="h4" color="gray.600" size="sm">
+          {comment.user.username} · {timeElapsed(comment.createdAt)} ago
+        </Text>
         <Text lineHeight={1.2} {...props}>
           {comment.text}
         </Text>

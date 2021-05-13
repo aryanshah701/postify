@@ -3,15 +3,7 @@ import { createUrqlClient } from "../utils/createUrqlClient";
 import { useMeQuery, usePostsQuery } from "../generated/graphql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Link, Stack } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { SinglePost } from "../components/SinglePost";
 
