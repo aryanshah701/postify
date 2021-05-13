@@ -29,9 +29,11 @@ const findAndUpdateHComment = (
     return true;
   }
 
-  // Recurse on children
-  for (const child of hcomment.children) {
-    if (findAndUpdateHComment(child, newComment)) return true;
+  // Recurse on children if there
+  if (hcomment.children) {
+    for (const child of hcomment.children) {
+      if (findAndUpdateHComment(child, newComment)) return true;
+    }
   }
 
   // The comment isn't a part of this thread
