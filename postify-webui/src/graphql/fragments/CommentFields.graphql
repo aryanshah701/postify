@@ -2,6 +2,7 @@ fragment CommentFields on Comment {
   id
   parentId
   text
+  depth
   user {
     id
     username

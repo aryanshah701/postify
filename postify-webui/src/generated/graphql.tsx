@@ -22,6 +22,7 @@ export type Comment = {
   user: User;
   parentId?: Maybe<Scalars['Int']>;
   text: Scalars['String'];
+  depth: Scalars['Float'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -199,7 +200,7 @@ export type VoteResponse = {
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
-  & Pick<Comment, 'id' | 'parentId' | 'text'>
+  & Pick<Comment, 'id' | 'parentId' | 'text' | 'depth'>
   & { user: (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'username'>
@@ -248,46 +249,6 @@ export type CommentsRecursiveFragment = (
                                         { __typename?: 'HierarchicalComment' }
                                         & { children: Array<(
                                           { __typename?: 'HierarchicalComment' }
-                                          & { children: Array<(
-                                            { __typename?: 'HierarchicalComment' }
-                                            & { children: Array<(
-                                              { __typename?: 'HierarchicalComment' }
-                                              & { children: Array<(
-                                                { __typename?: 'HierarchicalComment' }
-                                                & { children: Array<(
-                                                  { __typename?: 'HierarchicalComment' }
-                                                  & { children: Array<(
-                                                    { __typename?: 'HierarchicalComment' }
-                                                    & { children: Array<(
-                                                      { __typename?: 'HierarchicalComment' }
-                                                      & { children: Array<(
-                                                        { __typename?: 'HierarchicalComment' }
-                                                        & { children: Array<(
-                                                          { __typename?: 'HierarchicalComment' }
-                                                          & { children: Array<(
-                                                            { __typename?: 'HierarchicalComment' }
-                                                            & { children: Array<(
-                                                              { __typename?: 'HierarchicalComment' }
-                                                              & HCommentFieldsFragment
-                                                            )> }
-                                                            & HCommentFieldsFragment
-                                                          )> }
-                                                          & HCommentFieldsFragment
-                                                        )> }
-                                                        & HCommentFieldsFragment
-                                                      )> }
-                                                      & HCommentFieldsFragment
-                                                    )> }
-                                                    & HCommentFieldsFragment
-                                                  )> }
-                                                  & HCommentFieldsFragment
-                                                )> }
-                                                & HCommentFieldsFragment
-                                              )> }
-                                              & HCommentFieldsFragment
-                                            )> }
-                                            & HCommentFieldsFragment
-                                          )> }
                                           & HCommentFieldsFragment
                                         )> }
                                         & HCommentFieldsFragment
@@ -597,6 +558,7 @@ export const CommentFieldsFragmentDoc = gql`
   id
   parentId
   text
+  depth
   user {
     id
     username
@@ -654,36 +616,6 @@ export const CommentsRecursiveFragmentDoc = gql`
                                         ...HCommentFields
                                         children {
                                           ...HCommentFields
-                                          children {
-                                            ...HCommentFields
-                                            children {
-                                              ...HCommentFields
-                                              children {
-                                                ...HCommentFields
-                                                children {
-                                                  ...HCommentFields
-                                                  children {
-                                                    ...HCommentFields
-                                                    children {
-                                                      ...HCommentFields
-                                                      children {
-                                                        ...HCommentFields
-                                                        children {
-                                                          ...HCommentFields
-                                                          children {
-                                                            ...HCommentFields
-                                                            children {
-                                                              ...HCommentFields
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            }
-                                          }
                                         }
                                       }
                                     }
