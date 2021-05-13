@@ -4,6 +4,7 @@ import {
   RegularPostFragment,
   useCommentMutation,
   useMeQuery,
+  useUpdateCommentMutation,
 } from "../generated/graphql";
 import {
   Input,
@@ -31,11 +32,12 @@ export const Comment: React.FC<CommentProps> = ({
 
   // State for reply and edit forms
   const [reply, setReply] = useState("");
-  const [edit, setEdit] = useState("");
+  const [edit, setEdit] = useState(comment.text);
   const [showForm, setShowForm] = useState<"none" | "edit" | "reply">("none");
 
   // To submit a reply or edit this comment
-  const [{ fetching }, submitReply] = useCommentMutation();
+  const [{ fetching: fetchingReply }, submitReply] = useCommentMutation();
+  const [{ fetching: fetchingEdit }, editComment] = useUpdateCommentMutation();
 
   return (
     <Box my={2}>
@@ -81,7 +83,7 @@ export const Comment: React.FC<CommentProps> = ({
               <Button
                 size="xs"
                 colorScheme="teal"
-                isLoading={fetching}
+                isLoading={fetchingReply}
                 onClick={async () => {
                   // Post a comment with the current comment as the parent
                   await submitReply({
@@ -106,7 +108,16 @@ export const Comment: React.FC<CommentProps> = ({
               <Button
                 size="xs"
                 colorScheme="teal"
-                onClick={() => console.log(edit)}
+                isLoading={fetchingEdit}
+                onClick={async () => {
+                  // Edit this comment
+                  await editComment({
+                    id: comment.id,
+                    text: edit,
+                  });
+                  setShowForm("none");
+                  setEdit("");
+                }}
               >
                 Edit
               </Button>
