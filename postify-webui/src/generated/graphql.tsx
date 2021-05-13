@@ -214,6 +214,114 @@ export type CommentsRecursiveFragment = (
       { __typename?: 'HierarchicalComment' }
       & { children: Array<(
         { __typename?: 'HierarchicalComment' }
+        & { children: Array<(
+          { __typename?: 'HierarchicalComment' }
+          & { children: Array<(
+            { __typename?: 'HierarchicalComment' }
+            & { children: Array<(
+              { __typename?: 'HierarchicalComment' }
+              & { children: Array<(
+                { __typename?: 'HierarchicalComment' }
+                & { children: Array<(
+                  { __typename?: 'HierarchicalComment' }
+                  & { children: Array<(
+                    { __typename?: 'HierarchicalComment' }
+                    & { children: Array<(
+                      { __typename?: 'HierarchicalComment' }
+                      & { children: Array<(
+                        { __typename?: 'HierarchicalComment' }
+                        & { children: Array<(
+                          { __typename?: 'HierarchicalComment' }
+                          & { children: Array<(
+                            { __typename?: 'HierarchicalComment' }
+                            & { children: Array<(
+                              { __typename?: 'HierarchicalComment' }
+                              & { children: Array<(
+                                { __typename?: 'HierarchicalComment' }
+                                & { children: Array<(
+                                  { __typename?: 'HierarchicalComment' }
+                                  & { children: Array<(
+                                    { __typename?: 'HierarchicalComment' }
+                                    & { children: Array<(
+                                      { __typename?: 'HierarchicalComment' }
+                                      & { children: Array<(
+                                        { __typename?: 'HierarchicalComment' }
+                                        & { children: Array<(
+                                          { __typename?: 'HierarchicalComment' }
+                                          & { children: Array<(
+                                            { __typename?: 'HierarchicalComment' }
+                                            & { children: Array<(
+                                              { __typename?: 'HierarchicalComment' }
+                                              & { children: Array<(
+                                                { __typename?: 'HierarchicalComment' }
+                                                & { children: Array<(
+                                                  { __typename?: 'HierarchicalComment' }
+                                                  & { children: Array<(
+                                                    { __typename?: 'HierarchicalComment' }
+                                                    & { children: Array<(
+                                                      { __typename?: 'HierarchicalComment' }
+                                                      & { children: Array<(
+                                                        { __typename?: 'HierarchicalComment' }
+                                                        & { children: Array<(
+                                                          { __typename?: 'HierarchicalComment' }
+                                                          & { children: Array<(
+                                                            { __typename?: 'HierarchicalComment' }
+                                                            & { children: Array<(
+                                                              { __typename?: 'HierarchicalComment' }
+                                                              & HCommentFieldsFragment
+                                                            )> }
+                                                            & HCommentFieldsFragment
+                                                          )> }
+                                                          & HCommentFieldsFragment
+                                                        )> }
+                                                        & HCommentFieldsFragment
+                                                      )> }
+                                                      & HCommentFieldsFragment
+                                                    )> }
+                                                    & HCommentFieldsFragment
+                                                  )> }
+                                                  & HCommentFieldsFragment
+                                                )> }
+                                                & HCommentFieldsFragment
+                                              )> }
+                                              & HCommentFieldsFragment
+                                            )> }
+                                            & HCommentFieldsFragment
+                                          )> }
+                                          & HCommentFieldsFragment
+                                        )> }
+                                        & HCommentFieldsFragment
+                                      )> }
+                                      & HCommentFieldsFragment
+                                    )> }
+                                    & HCommentFieldsFragment
+                                  )> }
+                                  & HCommentFieldsFragment
+                                )> }
+                                & HCommentFieldsFragment
+                              )> }
+                              & HCommentFieldsFragment
+                            )> }
+                            & HCommentFieldsFragment
+                          )> }
+                          & HCommentFieldsFragment
+                        )> }
+                        & HCommentFieldsFragment
+                      )> }
+                      & HCommentFieldsFragment
+                    )> }
+                    & HCommentFieldsFragment
+                  )> }
+                  & HCommentFieldsFragment
+                )> }
+                & HCommentFieldsFragment
+              )> }
+              & HCommentFieldsFragment
+            )> }
+            & HCommentFieldsFragment
+          )> }
+          & HCommentFieldsFragment
+        )> }
         & HCommentFieldsFragment
       )> }
       & HCommentFieldsFragment
@@ -512,6 +620,87 @@ export const CommentsRecursiveFragmentDoc = gql`
       ...HCommentFields
       children {
         ...HCommentFields
+        children {
+          ...HCommentFields
+          children {
+            ...HCommentFields
+            children {
+              ...HCommentFields
+              children {
+                ...HCommentFields
+                children {
+                  ...HCommentFields
+                  children {
+                    ...HCommentFields
+                    children {
+                      ...HCommentFields
+                      children {
+                        ...HCommentFields
+                        children {
+                          ...HCommentFields
+                          children {
+                            ...HCommentFields
+                            children {
+                              ...HCommentFields
+                              children {
+                                ...HCommentFields
+                                children {
+                                  ...HCommentFields
+                                  children {
+                                    ...HCommentFields
+                                    children {
+                                      ...HCommentFields
+                                      children {
+                                        ...HCommentFields
+                                        children {
+                                          ...HCommentFields
+                                          children {
+                                            ...HCommentFields
+                                            children {
+                                              ...HCommentFields
+                                              children {
+                                                ...HCommentFields
+                                                children {
+                                                  ...HCommentFields
+                                                  children {
+                                                    ...HCommentFields
+                                                    children {
+                                                      ...HCommentFields
+                                                      children {
+                                                        ...HCommentFields
+                                                        children {
+                                                          ...HCommentFields
+                                                          children {
+                                                            ...HCommentFields
+                                                            children {
+                                                              ...HCommentFields
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

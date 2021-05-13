@@ -1,3 +1,4 @@
+# Depth of 30
 fragment CommentsRecursive on HierarchicalComment {
   ...HCommentFields
   children {
@@ -6,6 +7,87 @@ fragment CommentsRecursive on HierarchicalComment {
       ...HCommentFields
       children {
         ...HCommentFields
+        children {
+          ...HCommentFields
+          children {
+            ...HCommentFields
+            children {
+              ...HCommentFields
+              children {
+                ...HCommentFields
+                children {
+                  ...HCommentFields
+                  children {
+                    ...HCommentFields
+                    children {
+                      ...HCommentFields
+                      children {
+                        ...HCommentFields
+                        children {
+                          ...HCommentFields
+                          children {
+                            ...HCommentFields
+                            children {
+                              ...HCommentFields
+                              children {
+                                ...HCommentFields
+                                children {
+                                  ...HCommentFields
+                                  children {
+                                    ...HCommentFields
+                                    children {
+                                      ...HCommentFields
+                                      children {
+                                        ...HCommentFields
+                                        children {
+                                          ...HCommentFields
+                                          children {
+                                            ...HCommentFields
+                                            children {
+                                              ...HCommentFields
+                                              children {
+                                                ...HCommentFields
+                                                children {
+                                                  ...HCommentFields
+                                                  children {
+                                                    ...HCommentFields
+                                                    children {
+                                                      ...HCommentFields
+                                                      children {
+                                                        ...HCommentFields
+                                                        children {
+                                                          ...HCommentFields
+                                                          children {
+                                                            ...HCommentFields
+                                                            children {
+                                                              ...HCommentFields
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
