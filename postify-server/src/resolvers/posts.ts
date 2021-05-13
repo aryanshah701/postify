@@ -51,6 +51,7 @@ export class PostResolver {
     const comments = await Comment.find({
       where: { postId: post.id },
       relations: ["user"],
+      order: { createdAt: "DESC" },
     });
 
     // Arrange them in the heirarchial order
