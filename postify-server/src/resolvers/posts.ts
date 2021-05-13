@@ -127,6 +127,31 @@ export class PostResolver {
     return commentWithRelations;
   }
 
+  // Edit an existing comment on a post
+  @Mutation(() => Comment, { nullable: true })
+  @UseMiddleware(ReqAuthentication)
+  async updateComment(
+    @Arg("id", () => Int) id: number,
+    @Arg("text") text: string,
+    @Ctx() { req }: MyContext
+  ): Promise<Comment | null> {
+    // Update the comment by commentId and userId so only users of comments
+    // can update comments
+    const userId = req.session.userId;
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Comment)
+      .set({
+        text,
+      })
+      .where("id = :id", { id })
+      .andWhere("userId = :userId", { userId })
+      .returning("*")
+      .execute();
+
+    return result.raw[0];
+  }
+
   // Upvote or downvote the post
   @Mutation(() => VoteResponse)
   @UseMiddleware(ReqAuthentication)
