@@ -132,6 +132,7 @@ export class PostResolver {
   @UseMiddleware(ReqAuthentication)
   async updateComment(
     @Arg("id", () => Int) id: number,
+    @Arg("postId", () => Int) _: number,
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
   ): Promise<Comment | null> {
