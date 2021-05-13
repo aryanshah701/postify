@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from "type-graphql";
+import { ObjectType, Field, Int, GraphQLTimestamp } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -49,7 +49,7 @@ export class Comment extends BaseEntity {
   @Column()
   depth: number;
 
-  @Field(() => String)
+  @Field(() => GraphQLTimestamp)
   @CreateDateColumn()
   createdAt: Date;
 
