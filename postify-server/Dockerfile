@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # TS -> JS
-RUN npm build
+RUN npm run build
 
 ENV NODE_ENV production 
 
