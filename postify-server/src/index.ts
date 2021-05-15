@@ -1,7 +1,9 @@
+import "dotenv-safe/config";
+
 // ORM and db imports
 import "reflect-metadata";
 import { createConnection } from "typeorm";
-import { CLIENT_URL, __prod__ } from "./constants";
+import { __prod__ } from "./constants";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import { Vote } from "./entities/Vote";
@@ -30,9 +32,7 @@ const main = async () => {
   // Init the ORM connection(auto run migrations)
   const conn = await createConnection({
     type: "postgres",
-    database: "postify",
-    username: "postgres",
-    password: "postgres",
+    url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
     entities: [Post, User, Vote, Comment],
@@ -48,12 +48,12 @@ const main = async () => {
 
   // Set up redis for express session in memory storage
   const RedisStore = connectRedis(session);
-  const redisClient = new redis();
+  const redisClient = new redis(process.env.REDIS_URL);
 
   // Apply the cors middleware to all routes
   app.use(
     cors({
-      origin: CLIENT_URL,
+      origin: process.env.CLIENT,
       credentials: true,
     })
   );
@@ -73,7 +73,7 @@ const main = async () => {
         sameSite: "lax",
       },
       saveUninitialized: false,
-      secret: "skladjbsjhfajlf",
+      secret: process.env.SECRET,
       resave: false,
     })
   );
@@ -97,7 +97,9 @@ const main = async () => {
   apolloServer.applyMiddleware({ app, cors: false });
 
   // Spin up the express server
-  app.listen(4000, () => console.log("Server listening at PORT 4000"));
+  app.listen(parseInt(process.env.PORT), () =>
+    console.log("Server listening at PORT 4000")
+  );
 };
 
 main().catch((err) => {
