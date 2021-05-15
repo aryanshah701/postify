@@ -50,6 +50,9 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redisClient = new redis(process.env.REDIS_URL);
 
+  // Nginx proxy
+  app.set("trust proxy", 1);
+
   // Apply the cors middleware to all routes
   app.use(
     cors({
@@ -69,8 +72,9 @@ const main = async () => {
       cookie: {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
-        secure: __prod__, // true in production
         sameSite: "lax",
+        secure: __prod__, // true in production
+        domain: __prod__ ? ".aryanshah.tech" : undefined,
       },
       saveUninitialized: false,
       secret: process.env.SECRET,
