@@ -10,6 +10,7 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+COPY .env.production .env
 
 # TS -> JS
 RUN npm run build
