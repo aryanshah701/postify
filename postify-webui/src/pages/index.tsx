@@ -23,7 +23,7 @@ const Index = () => {
   return (
     <Layout>
       <Flex my={4} align="center">
-        <Heading>Postify</Heading>
+        <Heading>Feed</Heading>
         <NextLink href="/create-post">
           <Link ml="auto">Create Post</Link>
         </NextLink>
