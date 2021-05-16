@@ -7,28 +7,25 @@ export const timeElapsed = (createdAt: number): String => {
   }
 
   if (timeElapsedMinutes < 60) {
-    return timeElapsedMinutes === 1
-      ? "1 min"
-      : `${Math.floor(timeElapsedMinutes)} minutes`;
+    const roundedMinutes = Math.floor(timeElapsedMinutes);
+    return roundedMinutes === 1 ? "1 minute" : `${roundedMinutes} minutes`;
   }
 
   const timeElapsedHours = timeElapsedMinutes / 60;
 
   if (timeElapsedHours < 24) {
-    return timeElapsedHours === 1
-      ? "1 hour"
-      : `${Math.floor(timeElapsedHours)} hours`;
+    const roundedHours = Math.floor(timeElapsedHours);
+    return roundedHours === 1 ? "1 hour" : `${roundedHours} hours`;
   }
 
   const timeElapsedDays = timeElapsedHours / 24;
 
   if (timeElapsedDays < 365) {
-    return timeElapsedDays === 1
-      ? "1 day"
-      : `${Math.floor(timeElapsedDays)} days`;
+    const roundedDays = Math.floor(timeElapsedDays);
+    return roundedDays === 1 ? "1 day" : `${roundedDays} days`;
   }
 
-  const timeElapsedYears = timeElapsedDays / 364;
+  const timeElapsedYears = Math.floor(timeElapsedDays / 364);
 
   return timeElapsedYears === 1
     ? "1 year"
