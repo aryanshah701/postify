@@ -1,3 +1,4 @@
+import "dotenv-safe/config";
 import argon2 from "argon2";
 import { MyContext, UserInput, UserResponse } from "../types";
 import { isValidPassword, validateUser } from "../utils/validate";
@@ -10,11 +11,7 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-import {
-  CLIENT_URL,
-  COOKIE_NAME,
-  REDIS_CHANGE_PASS_PREFIX,
-} from "../constants";
+import { COOKIE_NAME, REDIS_CHANGE_PASS_PREFIX } from "../constants";
 import { User } from "../entities/User";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from "uuid";
@@ -224,7 +221,7 @@ export class UserResolver {
     );
 
     // Send forgot password email with token
-    const forgotPasswordEmailHtml = `<a href="${CLIENT_URL}/change-password/${token}">Click here to change your password</a>`;
+    const forgotPasswordEmailHtml = `<a href="${process.env.CLIENT}/change-password/${token}">Click here to change your password</a>`;
 
     await sendEmail(email, forgotPasswordEmailHtml);
 
