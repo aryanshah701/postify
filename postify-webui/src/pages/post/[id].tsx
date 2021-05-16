@@ -72,9 +72,9 @@ const Post: React.FC<{}> = ({}) => {
 
   return (
     <Layout>
-      <Flex mb={8}>
+      <Flex mb={8} mx={0}>
         <VotePost post={data.post as any} />
-        <Box pb={4} ml={4} borderBottom="1px" borderColor="gray.200">
+        <Box flex={1} pb={4} ml={4} borderBottom="1px" borderColor="gray.200">
           <Box mb={4}>
             <Heading my={4}>{data.post.title}</Heading>
             <Text>{data.post.text}</Text>
@@ -115,7 +115,6 @@ const Post: React.FC<{}> = ({}) => {
           </Box>
         </Box>
       </Flex>
-
       <Box>
         <HComments hcomments={data.post.hcomments} post={data.post} />
       </Box>
