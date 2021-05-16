@@ -9,7 +9,7 @@ import { SinglePost } from "../components/SinglePost";
 
 const Index = () => {
   const [paginationVars, setPaginationVars] = useState({
-    limit: 10,
+    limit: 6,
     cursor: null as null | string,
   });
   const [{ data, fetching }] = usePostsQuery({ variables: paginationVars });
