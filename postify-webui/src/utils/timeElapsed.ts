@@ -1,22 +1,36 @@
 export const timeElapsed = (createdAt: number): String => {
   const timeElapsedMilliseconds = Date.now() - createdAt;
-  const timeElapsedHours = Math.floor(
-    timeElapsedMilliseconds / (1000 * 1000 * 60 * 60)
-  );
-  const timeElapsedDays = Math.floor(timeElapsedHours / 24);
-  const timeElapsedYears = Math.floor(timeElapsedDays / 364);
+  const timeElapsedMinutes = timeElapsedMilliseconds / (1000 * 60);
 
-  if (timeElapsedYears >= 1) {
-    return timeElapsedYears === 1 ? "1 year" : `${timeElapsedYears} years`;
+  if (timeElapsedMinutes < 1) {
+    return "< 1 min";
   }
 
-  if (timeElapsedDays >= 1) {
-    return timeElapsedDays === 1 ? "1 day" : `${timeElapsedDays} days`;
+  if (timeElapsedMinutes < 60) {
+    return timeElapsedMinutes === 1
+      ? "1 min"
+      : `${Math.floor(timeElapsedMinutes)} minutes`;
   }
 
-  if (timeElapsedHours >= 1) {
-    return timeElapsedHours === 1 ? "1 hour" : `${timeElapsedHours} hours`;
+  const timeElapsedHours = timeElapsedMinutes / 60;
+
+  if (timeElapsedHours < 24) {
+    return timeElapsedHours === 1
+      ? "1 hour"
+      : `${Math.floor(timeElapsedHours)} hours`;
   }
 
-  return "< 1 hour";
+  const timeElapsedDays = timeElapsedHours / 24;
+
+  if (timeElapsedDays < 365) {
+    return timeElapsedDays === 1
+      ? "1 day"
+      : `${Math.floor(timeElapsedDays)} days`;
+  }
+
+  const timeElapsedYears = timeElapsedDays / 364;
+
+  return timeElapsedYears === 1
+    ? "1 year"
+    : `${Math.floor(timeElapsedYears)} years`;
 };
